@@ -10,6 +10,15 @@
         * [definitions](#definitions)
         * [code](#code)
         * [outcome](#outcome)
+    * [sensorimotor interactions](#sensorimotor-interactions)
+      * [description](#description)
+      * [glossary](#glossary-1)
+      * [theory](#theory-1)
+        * [summary](#summary)
+      * [pseudocode](#pseudocode-1)
+        * [definitions](#definitions-1)
+        * [code](#code-1)
+
 
 # Original MOOC source
 
@@ -143,4 +152,115 @@ print some stuff
 8: e2r2 SELF-SATISFIED
 9: e2r2  BORED
 10: e1r1 SELF-SATISFIED
+```
+
+## sensorimotor interactions
+
+### description
+
+The _sensorimotor paradigm_ suggests that input data 
+should be taken in association with output data, 
+by combining both of them into a single entity called a 
+*sensorimotor interaction*.
+i = ⟨e,r⟩: an interaction i is a tuple ⟨experiment, result⟩.
+
+The _sensorimotor paradigm_ allows implementing a
+type of motivation called *interactional motivation*
+
+### glossary
+
+* _to enact an interaction_ : to perform an experiment and receiving the result 
+that compose a given interaction
+
+* _to intend to enact_ interaction _⟨e,r⟩_ means that 
+the agent *performs experiment* _e_ while *expecting result* _r_
+
+* _actually enact_ interaction ⟨e,r'⟩ means agent receives result _r'_ instead of _r_
+
+### theory
+
+* In _reinforcement learning_ agent receives a reward 
+if it reaches a desirable goal ("reward button" is pressed).
+
+* In _reinforcement learning_ agent _appears_ to be motivated to
+reach the goald defined.
+
+* In _interactional motivation_ agent *has no predefined goal*
+
+* In _interactional motivation_ agent *has predefined *interactions* 
+
+* Every interaction has a _scalar valence_
+
+* Agent has a policy to try interactions with a *positive valence*
+
+#### summary
+
+the _sensorimotor paradigm_ allows designing *self-motivated*
+agents _without modeling the world as a predefined set of states_.
+Instead, the agent is left alone to _construct its own model of the world through_
+its individual _experience of interaction_
+
+### pseudocode
+
+#### definitions
+
+* experiments: e1 and e2
+* results: r1 and r2
+* valences:
+  * -1 not desirable interaction
+  *  1 desirable interaction
+* world (stateless) :
+  * e1 => r1
+  * e2 => r2
+* agent states
+  * PLEASED if interaction's valence is positive or 0
+  * PAINED  if interaction's valence is negative
+
+#### code
+
+Setting the valences for interactions (e1,r1) and (e2,r2).
+These valences are stored in memory
+```
+01   createPrimitiveInteraction(e1, r1, -1)
+02   createPrimitiveInteraction(e2, r2, 1)
+03   experiment = e1
+04   While()
+05      if (mood = PAINED)
+06         experiment = getOtherExperiment(experiment)
+```
+Implementation of a stateless World.
+The outcome of an experiment is based on only
+the experiment
+```
+07      if (experiment = e1)
+08         result = r1
+09      else
+10         result = r2
+```
+Retrieving the interaction to check it's valence
+```
+11      enactedInteraction = getInteraction(experiment, result)
+```
+Setting agent's mood based on interaction's valence
+```
+12      if (enactedInteraction.valence ≥ 0)
+13         mood = PLEASED
+14      else
+15         mood = PAINED
+```
+print some stuff
+```
+16      print experiment, result, mood
+```
+
+#### outcome
+
+```
+0: e1r1 PAINED
+1: e2r2 PLEASED
+2: e2r2 PLEASED
+3: e2r2 PLEASED
+4: e2r2 PLEASED
+5: e2r2 PLEASED
+6: e2r2 PLEASED
 ```
