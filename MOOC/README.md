@@ -1,3 +1,16 @@
+### Table of Contents
+
+  * [Original MOOC source](#original-mooc-source)
+  * [Summary of the lessons](#summary-of-the-lessons)
+    * [the embodied paradigm](#the-embodied-paradigm)
+      * [glossary](#glossary)
+      * [theory](#theory)
+      * [programming](#programming)
+      * [pseudocode](#pseudocode)
+        * [definitions](#definitions)
+        * [code](#code)
+        * [outcome](#outcome)
+
 # Original MOOC source
 
 In this directory is the source of programs created by the tutors of the IDEAL MOOC.
