@@ -1,4 +1,4 @@
-= Original MOOC source
+# Original MOOC source
 
 In this directory is the source of programs created by the tutors of the IDEAL MOOC.
 
@@ -6,15 +6,15 @@ Here is the link for the original source:
 
 https://developmental-learning-tutorial.googlecode.com/svn/trunk
 
-= Summary of the lessons
+# Summary of the lessons
 
 (Merely a copy paste or a copy paste with some small modification of excerpts from the original text)
 
-== the embodied paradigm
+## the embodied paradigm
 
 http://liris.cnrs.fr/ideal/mooc/lesson.php?n=011
 
-=== glossary
+### glossary
 
 * _agent_ is an autonomous entity which observes through sensors and acts upon an environment using actuators 
 (https://en.wikipedia.org/wiki/Intelligent_agent)
@@ -27,7 +27,7 @@ http://liris.cnrs.fr/ideal/mooc/lesson.php?n=011
 
 * _result_ of an experiment is the sensor's data after the experiment
 
-=== theory
+### theory
 
 * The agent is not a passive observer of reality
 
@@ -41,7 +41,7 @@ http://liris.cnrs.fr/ideal/mooc/lesson.php?n=011
 
 * consequence: results of the same experiment can be different because the state of the environment can be different
 
-=== programming
+### programming
 
 * an environment has no state, if experiment's results are not dependent from the state, only from the experiment
 (It is possible only simulations, like in the first programming example)
@@ -58,9 +58,9 @@ http://liris.cnrs.fr/ideal/mooc/lesson.php?n=011
 
 * anticipation is based on this history
 
-=== pseudocode
+### pseudocode
 
-==== definitions
+#### definitions
 
 * experiments: e1 and e2
 * results: r1 and r2
@@ -72,7 +72,7 @@ http://liris.cnrs.fr/ideal/mooc/lesson.php?n=011
   * FRUSTRATED if anticipation is bad
   * BORED if the last 3 anticipation were good
 
-==== code
+#### code
 
 ```
 01   experiment = e1
@@ -116,7 +116,7 @@ print some stuff
 20      print cycle, experiment, result, mood
 ```
 
-==== outcome
+#### outcome
 
 ```
 0: e1r1 FRUSTRATED
