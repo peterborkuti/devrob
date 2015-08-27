@@ -19,8 +19,8 @@ public class Prog01 extends AbstractProgram {
 	String experiment;
 	World world;
 	String result;
-	private static final int PAIN_LIMIT = 2;
-	private static final int PLEASED_LIMIT = 8;
+	private static final int PAIN_LIMIT = 1000;
+	private static final int PLEASED_LIMIT = 2;
 	private Map<String,Integer> valences = new HashMap<String, Integer>();
 	private String enactedInteraction;
 	private String contextInteraction;
@@ -48,7 +48,7 @@ public class Prog01 extends AbstractProgram {
 		contextInteraction = enactedInteraction;
 		prevResult = result;
 		List<String> anticipations = anticipate(enactedInteraction);
-		Integer prevValence = getInteractionValence(experiment, prevResult);
+		//Integer prevValence = getInteractionValence(experiment, prevResult);
 
 		experiment = selectExperiment(experiment, anticipations, counter);
 
@@ -56,7 +56,7 @@ public class Prog01 extends AbstractProgram {
 
 		enactedInteraction =getInteraction(experiment, result);
 
-		Integer valence = prevValence + getInteractionValence(experiment, result);
+		Integer valence = /*prevValence +*/ getInteractionValence(experiment, result);
 
 		if (valence >= 0) {
 			if (mood != PLEASED) counter = 0;
@@ -72,32 +72,30 @@ public class Prog01 extends AbstractProgram {
 		learnCompositeInteraction(contextInteraction, enactedInteraction);
 
 		System.out.println(step + ":" + this.toString());
-		
 	}
 
 	private String selectExperiment(
 			String experiment, List<String> anticipations, int counter) {
 
-		boolean painPanic =	(mood == PAINED) && (counter > PAIN_LIMIT);
-		boolean pleasePanic = (mood == PLEASED) && (counter > PLEASED_LIMIT);
+		boolean feelBigPain =	(mood == PAINED) && (counter > PAIN_LIMIT);
+		boolean bored = (mood == PLEASED) && (counter > PLEASED_LIMIT);
 
-		experiment = 
-			pickOtherExperiment(experiment, painPanic || pleasePanic);
-
-		if (pleasePanic) {
-			return experiment;
-		}
+		String selectedExperiment = "";
 
 		for (String interaction: anticipations) {
 			if (getInteractionValence(interaction) >= 0) {
 				String parts[] = interaction.split("-");
-				experiment = parts[0];
+				selectedExperiment = parts[0];
 
 				break;
 			}
 		}
 
-		return experiment;
+		if (feelBigPain || "".equals(selectedExperiment) || bored) {
+			selectedExperiment =pickOtherExperiment(experiment, true);
+		}
+
+		return selectedExperiment;
 	}
 
 	private void learnCompositeInteraction(

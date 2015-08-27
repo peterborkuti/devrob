@@ -5,6 +5,8 @@ import existence.Existence010;
 
 /** Uncomment these lines to instantiate other existences: */
 
+import existence.Existence030;
+import existence.Existence040;
 //import existence.Existence020;
 //import existence.Existence030;
 //import existence.Existence031;
@@ -23,12 +25,12 @@ public class Main {
 	public static void main(String[] args){
 				
 		/** Change this line to instantiate another existence: */
-		Existence existence = new Existence010();
+		//Existence existence = new Existence010();
 		//Existence existence = new Existence020();
 		//Existence existence = new Existence030();
 		//Existence existence = new Existence031();
 		//Existence existence = new Existence032();
-		//Existence existence = new Existence040();
+		Existence existence = new Existence040();
 		//Existence existence = new Existence050();
 		//Existence existence = new Existence060();
 		

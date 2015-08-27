@@ -26,9 +26,9 @@ public class Existence030 extends Existence020 {
 		Experiment e2 = addOrGetExperience(LABEL_E2);
 		Result r1 = createOrGetResult(LABEL_R1);
 		Result r2 = createOrGetResult(LABEL_R2);
-		addOrGetPrimitiveInteraction(e1, r1, -1);
+		addOrGetPrimitiveInteraction(e1, r1, 1);
 		addOrGetPrimitiveInteraction(e1, r2, 1);
-		addOrGetPrimitiveInteraction(e2, r1, -1);
+		addOrGetPrimitiveInteraction(e2, r1, 1);
 		addOrGetPrimitiveInteraction(e2, r2, 1);
 	}
 	
