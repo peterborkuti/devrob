@@ -1,14 +1,15 @@
 package hu.bp.pattern;
 
-import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.List;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsArrayContaining.hasItemInArray;
+import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
+import static org.hamcrest.collection.IsArrayWithSize.emptyArray;
+import static org.hamcrest.collection.IsMapContaining.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsArrayContaining.*;
-
-import static org.hamcrest.collection.IsArrayWithSize.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,49 +19,34 @@ public class PatternFinderTest {
 	public void setUp() throws Exception {
 	}
 
+	@Test
 	public void testFindEmpty() {
 		PatternFinder p = new PatternFinder("", 1);
-		String[] patterns = p.getAll("");
-		assertThat(patterns, emptyArray());
+		Map<String, Integer> patterns = p.getAll("");
+		assertTrue(patterns.isEmpty());
 
 		patterns = p.getAll("abcd");
-		assertThat(patterns, emptyArray());
+		assertTrue(patterns.isEmpty());
 
 		p = new PatternFinder("abcd", 1);
 		patterns = p.getAll("");
-		assertThat(patterns, emptyArray());
-		
+		assertTrue(patterns.isEmpty());		
 	}
 
+	@Test
 	public void testFindSameOneLength() {
 		PatternFinder p = new PatternFinder("1231231", 1);
-		String[] patterns = p.getAll("1");
-		assertThat(patterns, arrayWithSize(1));
-		assertThat(patterns, hasItemInArray("23"));
-		assertThat(patterns, hasItemInArray("e1r1e2r1"));
+		Map<String, Integer> patterns = p.getAll("1");
+		assertEquals(patterns.size(), 1);
+		assertThat(patterns, hasEntry("23", 2));
 	}
 
-	public void testFindSmallest() {
-		String[] patterns = PatternFinder.find("","1");
-		assertThat(patterns, arrayWithSize(2));
-		assertThat(patterns, hasItemInArray("1"));
-		
-
-		patterns = PatternFinder.find("1234321","1");
-		assertThat(patterns, arrayWithSize(2));
-		assertThat(patterns, hasItemInArray("1"));
-	}
-
+	@Test
 	public void testFindDoubles() {
-		String[] patterns = PatternFinder.find("12341234","12");
-		assertThat(patterns, arrayWithSize(2));
-		assertThat(patterns, hasItemInArray("12"));
-		
-		
-
-		patterns = PatternFinder.find("1234321","1");
-		assertThat(patterns, arrayWithSize(2));
-		assertThat(patterns, hasItemInArray("1"));
+		PatternFinder p = new PatternFinder("A1A2A3A1A2A3A1", 2);
+		Map<String, Integer> patterns = p.getAll("A1");
+		assertEquals(patterns.size(), 1);
+		assertThat(patterns, hasEntry("A2A3", 2));
 	}
 
 }
