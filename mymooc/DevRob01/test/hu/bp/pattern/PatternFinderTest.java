@@ -19,24 +19,24 @@ public class PatternFinderTest {
 	}
 
 	public void testFindEmpty() {
-		String[] patterns = PatternFinder.find("","","");
+		PatternFinder p = new PatternFinder("", 1);
+		String[] patterns = p.getAll("");
 		assertThat(patterns, emptyArray());
 
-		patterns = PatternFinder.find("abcd","","");
+		patterns = p.getAll("abcd");
+		assertThat(patterns, emptyArray());
+
+		p = new PatternFinder("abcd", 1);
+		patterns = p.getAll("");
 		assertThat(patterns, emptyArray());
 		
-		patterns = PatternFinder.find("","abcd","");
-		assertThat(patterns, emptyArray());
-
-		patterns = PatternFinder.find("","","abcd");
-		assertThat(patterns, emptyArray());
-
 	}
 
-	public void testFindSame() {
-		String[] patterns = PatternFinder.find("e1r1e2r1","e1r1","r1");
-		assertThat(patterns, arrayWithSize(2));
-		assertThat(patterns, hasItemInArray("e1r1"));
+	public void testFindSameOneLength() {
+		PatternFinder p = new PatternFinder("1231231", 1);
+		String[] patterns = p.getAll("1");
+		assertThat(patterns, arrayWithSize(1));
+		assertThat(patterns, hasItemInArray("23"));
 		assertThat(patterns, hasItemInArray("e1r1e2r1"));
 	}
 
