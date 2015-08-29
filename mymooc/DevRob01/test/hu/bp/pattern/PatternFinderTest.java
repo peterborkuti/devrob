@@ -31,6 +31,13 @@ public class PatternFinderTest {
 	}
 
 	@Test
+	public void testTooSmallSequence() {
+		PatternFinder p = new PatternFinder("12", 4);
+		Map<String, Integer> patterns = p.getAll("1");
+		assertTrue(patterns.isEmpty());
+	}
+
+	@Test
 	public void testFindSameOneLength() {
 		PatternFinder p = new PatternFinder("1231231", 1);
 		Map<String, Integer> patterns = p.getAll("1");

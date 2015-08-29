@@ -45,7 +45,9 @@ public class PatternFinder {
 		Map<String, Integer> occurences = new HashMap<String, Integer>();
 
 		if ((sequence == null) || ("".equals(sequence)) ||
-			(endSequence == null) || ("".equals(endSequence))) {
+			(endSequence == null) || ("".equals(endSequence)) ||
+			sequence.length() < itemLength) {
+
 			return occurences;
 		}
 
