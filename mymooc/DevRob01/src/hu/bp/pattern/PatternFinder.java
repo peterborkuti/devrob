@@ -1,11 +1,7 @@
 package hu.bp.pattern;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,13 +32,22 @@ public class PatternFinder {
 	 * Gets all the sub-sequences in sequence where the sub-sequence
 	 * starts with the last item of sequences and ends with endSequence.
 	 * 
-	 * It trims the staring item and endSequence from the sub-sequence.
+	 * It trims the starting item and endSequence from the sub-sequence.
+	 * If endSequence was next to the starting item, the returned sub-sequence
+	 * will be the empty string ("")
+	 * 
+	 * It also counts how many times was the actual sub-sequence found.
 	 * 
 	 * @param endSequence
-	 * @return array of found sub-sequences
+	 * @return Map of found sub-sequences and occurences
 	 */
 	public Map<String, Integer> getAll(String endSequence) {
-		Map<String, Integer> occurences = new HashMap<String, Integer>(); 
+		Map<String, Integer> occurences = new HashMap<String, Integer>();
+
+		if ((sequence == null) || ("".equals(sequence)) ||
+			(endSequence == null) || ("".equals(endSequence))) {
+			return occurences;
+		}
 
 		String lastItem = sequence.substring(sequence.length() - itemLength);
 		String regExp = lastItem + ".*?" + endSequence;
@@ -60,6 +65,8 @@ public class PatternFinder {
 			}
 
 			occurences.put(found, occurences.get(found) + 1);
+
+			matcher.region(matcher.end() - itemLength, sequence.length());
 		}
 
 		return occurences;
