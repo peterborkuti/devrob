@@ -35,7 +35,7 @@ public class PatternFinderTest {
 		PatternFinder p = new PatternFinder("1231231", 1);
 		Map<String, Integer> patterns = p.getAll("1");
 		assertEquals(patterns.size(), 1);
-		assertThat(patterns, hasEntry("23", 2));
+		assertThat(patterns, hasEntry("231", 2));
 	}
 
 	@Test
@@ -43,7 +43,7 @@ public class PatternFinderTest {
 		PatternFinder p = new PatternFinder("A1A2A3A1A2A3A1", 2);
 		Map<String, Integer> patterns = p.getAll("A1");
 		assertEquals(patterns.size(), 1);
-		assertThat(patterns, hasEntry("A2A3", 2));
+		assertThat(patterns, hasEntry("A2A3A1", 2));
 	}
 
 	@Test
@@ -52,11 +52,11 @@ public class PatternFinderTest {
 
 		Map<String, Integer> patterns = p.getAll("1");
 		assertEquals(patterns.size(), 1);
-		assertThat(patterns, hasEntry("3", 2));
+		assertThat(patterns, hasEntry("31", 2));
 
 		patterns = p.getAll("3");
 		assertEquals(patterns.size(), 1);
-		assertThat(patterns, hasEntry("", 2));
+		assertThat(patterns, hasEntry("3", 2));
 	}
 
 	@Test
@@ -65,11 +65,11 @@ public class PatternFinderTest {
 
 		Map<String, Integer> patterns = p.getAll("A1");
 		assertEquals(patterns.size(), 1);
-		assertThat(patterns, hasEntry("A3", 2));
+		assertThat(patterns, hasEntry("A3A1", 2));
 
 		patterns = p.getAll("A3");
 		assertEquals(patterns.size(), 1);
-		assertThat(patterns, hasEntry("", 2));
+		assertThat(patterns, hasEntry("A3", 2));
 	}
 
 	@Test
@@ -78,23 +78,23 @@ public class PatternFinderTest {
 
 		Map<String, Integer> patterns = p.getAll("A1");
 		assertEquals(patterns.size(), 3);
-		assertThat(patterns, hasEntry("", 1));
-		assertThat(patterns, hasEntry("A3", 1));
-		assertThat(patterns, hasEntry("A3A4", 1));
+		assertThat(patterns, hasEntry("A1", 1));
+		assertThat(patterns, hasEntry("A3A1", 1));
+		assertThat(patterns, hasEntry("A3A4A1", 1));
 
 		patterns = p.getAll("A2");
 		assertEquals(patterns.size(), 3);
-		assertThat(patterns, hasEntry("A3A1", 1));
-		assertThat(patterns, hasEntry("A3A4A1", 1));
-		assertThat(patterns, hasEntry("A1", 1));
+		assertThat(patterns, hasEntry("A3A1A2", 1));
+		assertThat(patterns, hasEntry("A3A4A1A2", 1));
+		assertThat(patterns, hasEntry("A1A2", 1));
 
 		patterns = p.getAll("A3");
 		assertEquals(patterns.size(), 1);
-		assertThat(patterns, hasEntry("", 2));
+		assertThat(patterns, hasEntry("A3", 2));
 
 		patterns = p.getAll("A4");
 		assertEquals(patterns.size(), 1);
-		assertThat(patterns, hasEntry("A3A1A2A3", 1));
+		assertThat(patterns, hasEntry("A3A1A2A3A4", 1));
 	}
 
 }

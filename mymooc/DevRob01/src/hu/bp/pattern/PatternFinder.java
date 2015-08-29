@@ -32,9 +32,9 @@ public class PatternFinder {
 	 * Gets all the sub-sequences in sequence where the sub-sequence
 	 * starts with the last item of sequences and ends with endSequence.
 	 * 
-	 * It trims the starting item and endSequence from the sub-sequence.
+	 * It trims the starting item from the sub-sequence.
 	 * If endSequence was next to the starting item, the returned sub-sequence
-	 * will be the empty string ("")
+	 * will be the endSequence.
 	 * 
 	 * It also counts how many times was the actual sub-sequence found.
 	 * 
@@ -58,7 +58,7 @@ public class PatternFinder {
 			String found =
 				sequence.substring(
 					matcher.start() + itemLength,
-					matcher.end() - endSequence.length());
+					matcher.end());
 
 			if (!occurences.containsKey(found)) {
 				occurences.put(found, 0);
