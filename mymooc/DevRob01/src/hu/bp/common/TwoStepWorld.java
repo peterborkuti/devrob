@@ -6,10 +6,10 @@ public class TwoStepWorld implements World {
 
 	@Override
 	public String getResult(String experiment) {
-		String retVal = "r2";
+		String retVal = "r1";
 
 		if (previousExperiment.equals(experiment)) {
-			retVal = "r1";
+			retVal = "r2";
 		}
 
 		previousExperiment =experiment;
