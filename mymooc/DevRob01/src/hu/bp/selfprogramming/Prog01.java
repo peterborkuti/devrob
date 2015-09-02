@@ -30,6 +30,7 @@ public class Prog01 extends AbstractProgram {
 	private int counter;
 	public String[] possibleInteractions;
 	private String lastEnactedPrimitiveInteraction;
+	private int counterPleased,counterPanid;
 
 	@Override
 	protected void init() {
@@ -38,9 +39,9 @@ public class Prog01 extends AbstractProgram {
 		world = new ThreeStepWorld();
 		valences = new HashMap<String, Float>();
 		valences.put("e1r1", -1f);
-		valences.put("e2r2", 2f);
+		valences.put("e2r2", 1f);
 		valences.put("e2r1", -1f);
-		valences.put("e1r2", 2f);
+		valences.put("e1r2", 1f);
 		enactedInteractions = "";
 		lastEnactedPrimitiveInteraction = "";
 		counter = 0;
@@ -67,10 +68,12 @@ public class Prog01 extends AbstractProgram {
 		if (valence >= 0) {
 			if (mood != PLEASED) counter = 0;
 			mood = PLEASED;
+			counterPleased++;
 		}
 		else {
 			if (mood != PAINED) counter = 0;
 			mood = PAINED;
+			counterPanid++;
 		}
 
 		counter++;
@@ -83,6 +86,7 @@ public class Prog01 extends AbstractProgram {
 		}
 		System.out.println(
 			(step + "   ").substring(0, 4) + ":" +
+			"(" + counterPleased + "/" + counterPanid + ")" +
 			(mood +"   ").substring(0, 8) + it + this.toString());
 	}
 
@@ -99,10 +103,11 @@ public class Prog01 extends AbstractProgram {
 			String experiment =
 				interactions.substring(0, EXPERIMENT_CHAR_LENGTH);
 
+			//System.out.print("try:" + interactions);
 			String result = world.getResult(experiment);
 
 			lastEnactedPrimitiveInteraction = experiment + result;
-
+			//System.out.println("enacted:" + lastEnactedPrimitiveInteraction);
 			return experiment + result;
 		}
 
@@ -129,8 +134,7 @@ public class Prog01 extends AbstractProgram {
 		boolean feelBigPain =	(mood == PAINED) && (counter > PAIN_LIMIT);
 		boolean bored = (mood == PLEASED) && (counter > PLEASED_LIMIT);
 
-		if ("".equals(interaction) || experiment.proclivity < 0 ||
-				feelBigPain || bored) {
+		if ("".equals(interaction) || experiment.proclivity < 0 || feelBigPain) {
 			interaction = getOtherRandomInteraction(interaction);
 		}
 
@@ -172,10 +176,12 @@ public class Prog01 extends AbstractProgram {
 				experiment =
 						new SelectedExperiment(interaction, proclivity, occurence);
 				expList.add(experiment);
+				/*
 				System.out.println(
 					"selectExperiment - candidates:" +
 					StringUtils.join(
 						expList.toArray(new SelectedExperiment[0]), ","));
+				*/
 			}
 		}
 
