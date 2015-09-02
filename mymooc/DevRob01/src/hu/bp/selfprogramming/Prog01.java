@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Prog01 extends AbstractProgram {
 	Mood mood;
 	World world;
@@ -36,9 +38,9 @@ public class Prog01 extends AbstractProgram {
 		world = new ThreeStepWorld();
 		valences = new HashMap<String, Float>();
 		valences.put("e1r1", -1f);
-		valences.put("e2r2", 1f);
+		valences.put("e2r2", 2f);
 		valences.put("e2r1", -1f);
-		valences.put("e1r2", 1f);
+		valences.put("e1r2", 2f);
 		enactedInteractions = "";
 		lastEnactedPrimitiveInteraction = "";
 		counter = 0;
@@ -137,29 +139,49 @@ public class Prog01 extends AbstractProgram {
 
 	public SelectedExperiment selectExperiment(
 			Map<String, Integer> anticipations, int counter, String lastInteraction) {
-
-		Map<String, Float> proclivities = new HashMap<String, Float>();
+		System.out.println("selectExperiment - lastInteraction:" + lastInteraction);
 
 		String[] interactionList =
 			anticipations.keySet().toArray(new String[0]);
 
+		float maxProclivity = Integer.MIN_VALUE;
+
 		SelectedExperiment experiment =
-			new SelectedExperiment("", new Float(Integer.MIN_VALUE), 0);
+			new SelectedExperiment("", maxProclivity, 0);
+
+		// a list for experiments with the same proclivity
+		// a random experiment will be choosen from this list
+		ArrayList<SelectedExperiment> expList =
+			new ArrayList<SelectedExperiment>();
+
+		expList.add(experiment);
 
 		for (String interaction: interactionList) {
 			Float valence = getInteractionValence(interaction);
 			Integer occurence = anticipations.get(interaction);
-			Float proclivity = valence * occurence;
+			Float proclivity = valence * ((occurence == 0)? 0.5f : occurence);
 
-			proclivities.put(interaction, proclivity);
+			// maximum selection
+			if ((proclivity - maxProclivity) > 0.1) {
+				maxProclivity = proclivity;
+				expList.clear();
+			}
 
-			if (proclivity > experiment.proclivity) {
+			// store experiments with the same actual maximum proclivity
+			if (Math.abs(proclivity - maxProclivity) <= 0.1) {
 				experiment =
-					new SelectedExperiment(interaction, proclivity, occurence);
+						new SelectedExperiment(interaction, proclivity, occurence);
+				expList.add(experiment);
+				System.out.println(
+					"selectExperiment - candidates:" +
+					StringUtils.join(
+						expList.toArray(new SelectedExperiment[0]), ","));
 			}
 		}
 
-		return experiment;
+		// choose a random experiment
+		int index = (int) Math.floor(Math.random() * expList.size());
+		return expList.get(index);
 	}
 
 	public static Map<String, Integer> anticipate(
@@ -174,7 +196,7 @@ public class Prog01 extends AbstractProgram {
 		// the same in every time
 		for (int i = 0; i < defaultInteractions.length; i++) {
 			int index = (int) Math.floor(Math.random() * dInt.size());
-			proposes.put(dInt.remove(index), 1);
+			proposes.put(dInt.remove(index), 0);
 		}
 
 		// all the possible complex interactions, which can led to 
@@ -182,6 +204,15 @@ public class Prog01 extends AbstractProgram {
 		for (String interaction: defaultInteractions) {
 			proposes.putAll(p.getAll(interaction));
 		}
+
+		List<String> tmp = new ArrayList<String>();
+
+		for (String key: proposes.keySet()) {
+			tmp.add("(" + proposes.get(key) + ")" + key);
+		}
+
+		System.out.println(
+			"anticipations:" + StringUtils.join(tmp.toArray(new String[0]),","));
 
 		return proposes;
 	}

@@ -1,2 +1,4 @@
 *.zip
-www/**
+ideal/**
+robots.txt
+mooc/**

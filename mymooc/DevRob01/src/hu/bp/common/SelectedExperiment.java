@@ -13,4 +13,11 @@ public class SelectedExperiment {
 		this.occurences = occurences;
 	}
 
+	@Override
+	public String toString() {
+		return "SelectedExperiment [experiment=" + experiment + ", proclivity="
+				+ proclivity + ", occurences=" + occurences + "]";
+	}
+
+
 }
