@@ -5,9 +5,8 @@ import static hu.bp.common.Mood.PAINED;
 import static hu.bp.common.Mood.PLEASED;
 import hu.bp.common.AbstractProgram;
 import hu.bp.common.Mood;
-import hu.bp.common.SimpleWorld;
+import hu.bp.common.SelectedExperiment;
 import hu.bp.common.ThreeStepWorld;
-import hu.bp.common.TwoStepWorld;
 import hu.bp.common.World;
 import hu.bp.pattern.PatternFinder;
 
@@ -24,33 +23,38 @@ public class Prog01 extends AbstractProgram {
 	private static final int PLEASED_LIMIT = 4;
 	private static final int INTERACTION_CHAR_LENGTH = 4;
 	private static final int EXPERIMENT_CHAR_LENGTH = 2;
-	private Map<String,Float> valences = new HashMap<String, Float>();
+	public Map<String,Float> valences;
 	private String enactedInteractions;
 	private int counter;
-	private String[] possibleInteractions;
-	private String lastIntendedPrimitiveInteraction;
+	public String[] possibleInteractions;
+	private String lastEnactedPrimitiveInteraction;
 
 	@Override
 	protected void init() {
 		super.init();
 		mood = BORED;
 		world = new ThreeStepWorld();
+		valences = new HashMap<String, Float>();
 		valences.put("e1r1", -1f);
 		valences.put("e2r2", 1f);
 		valences.put("e2r1", -1f);
 		valences.put("e1r2", 1f);
 		enactedInteractions = "";
-		lastIntendedPrimitiveInteraction = "";
+		lastEnactedPrimitiveInteraction = "";
 		counter = 0;
 		possibleInteractions = valences.keySet().toArray(new String[0]);
 	}
 
 	@Override
 	protected void doOneStep(int step) {
-		Map<String, Integer> anticipations = anticipate(enactedInteractions);
+		Map<String, Integer> anticipations =
+			anticipate(enactedInteractions, possibleInteractions,
+				INTERACTION_CHAR_LENGTH);
 
-		String intendedInteractions =
-			selectExperiment(anticipations, counter, lastIntendedPrimitiveInteraction);
+		SelectedExperiment selExp =
+			selectExperiment(anticipations, counter, lastEnactedPrimitiveInteraction);
+
+		String intendedInteractions = checkSelectedExperiment(selExp);
 
 		String enactedInteractionList = enact(intendedInteractions);
 
@@ -76,8 +80,8 @@ public class Prog01 extends AbstractProgram {
 			it = intendedInteractions + "=>" + it;
 		}
 		System.out.println(
-			step + ":" + (mood +"   ").substring(0, 8) + it +
-			this.toString());
+			(step + "   ").substring(0, 4) + ":" +
+			(mood +"   ").substring(0, 8) + it + this.toString());
 	}
 
 	private String enact(String interactions) {
@@ -89,12 +93,13 @@ public class Prog01 extends AbstractProgram {
 		}
 
 		if (interactions.length() == INTERACTION_CHAR_LENGTH) {
-			lastIntendedPrimitiveInteraction = interactions;
 
 			String experiment =
 				interactions.substring(0, EXPERIMENT_CHAR_LENGTH);
 
 			String result = world.getResult(experiment);
+
+			lastEnactedPrimitiveInteraction = experiment + result;
 
 			return experiment + result;
 		}
@@ -116,50 +121,65 @@ public class Prog01 extends AbstractProgram {
 		return enactedPreInteraction;
 	}
 
-	private String selectExperiment(
-			Map<String, Integer> anticipations, int counter, String lastIntendedInteraction) {
+	private String checkSelectedExperiment(SelectedExperiment experiment) {
+		String interaction = experiment.experiment;
 
 		boolean feelBigPain =	(mood == PAINED) && (counter > PAIN_LIMIT);
 		boolean bored = (mood == PLEASED) && (counter > PLEASED_LIMIT);
+
+		if ("".equals(interaction) || experiment.proclivity < 0 ||
+				feelBigPain || bored) {
+			interaction = getOtherRandomInteraction(interaction);
+		}
+
+		return interaction;
+	}
+
+	public SelectedExperiment selectExperiment(
+			Map<String, Integer> anticipations, int counter, String lastInteraction) {
 
 		Map<String, Float> proclivities = new HashMap<String, Float>();
 
 		String[] interactionList =
 			anticipations.keySet().toArray(new String[0]);
-		Float maxProclivity = Float.MIN_VALUE;
-		String bestInteractionList = "";
+
+		SelectedExperiment experiment =
+			new SelectedExperiment("", new Float(Integer.MIN_VALUE), 0);
 
 		for (String interaction: interactionList) {
-			Float proclivity =
-				(anticipations.get(interaction) *
-				getInteractionValence(interaction));
+			Float valence = getInteractionValence(interaction);
+			Integer occurence = anticipations.get(interaction);
+			Float proclivity = valence * occurence;
 
 			proclivities.put(interaction, proclivity);
 
-			if (proclivity > maxProclivity) {
-				maxProclivity = proclivity;
-				bestInteractionList = interaction;
+			if (proclivity > experiment.proclivity) {
+				experiment =
+					new SelectedExperiment(interaction, proclivity, occurence);
 			}
 		}
 
-		if (feelBigPain || "".equals(bestInteractionList) || bored ||
-				maxProclivity < 0) {
-			bestInteractionList = getOtherRandomInteraction(lastIntendedInteraction);
-		}
-
-		return bestInteractionList;
+		return experiment;
 	}
 
-	private Map<String, Integer> anticipate(String interactions) {
-		PatternFinder p = new PatternFinder(interactions, INTERACTION_CHAR_LENGTH);
+	public static Map<String, Integer> anticipate(
+		String interactions, String[] defaultInteractions, int len) {
+		PatternFinder p = new PatternFinder(interactions, len);
 
 		Map<String, Integer> proposes = new HashMap<String, Integer>();
 
-		for (String i : Arrays.spossibleInteractions.) {
-			proposes.put(i, 0);
+		List<String> dInt = new ArrayList<String>(Arrays.asList(defaultInteractions));
+
+		// default primitive interactions in random order to not to choose
+		// the same in every time
+		for (int i = 0; i < defaultInteractions.length; i++) {
+			int index = (int) Math.floor(Math.random() * dInt.size());
+			proposes.put(dInt.remove(index), 1);
 		}
 
-		for (String interaction: possibleInteractions) {
+		// all the possible complex interactions, which can led to 
+		// a default primitive interaction
+		for (String interaction: defaultInteractions) {
 			proposes.putAll(p.getAll(interaction));
 		}
 
@@ -167,7 +187,8 @@ public class Prog01 extends AbstractProgram {
 	}
 
 	private Float getInteractionValence(String interaction) {
-		if ("".equals(interaction) || interaction.length() < INTERACTION_CHAR_LENGTH) {
+		if ("".equals(interaction) ||
+			(interaction.length() < INTERACTION_CHAR_LENGTH)) {
 			return 0f;
 		}
 
@@ -197,6 +218,8 @@ public class Prog01 extends AbstractProgram {
 		String[] array = possible.toArray(new String[0]);
 
 		int r = (int) Math.floor(Math.random() * array.length);
+
+		System.out.println("Choose random " + array[r] + " instead of " + interaction);
 
 		return array[r];
 	}
