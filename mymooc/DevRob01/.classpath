@@ -10,5 +10,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/DevRob01/lib/commons-lang3-3.4-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/guava-18.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

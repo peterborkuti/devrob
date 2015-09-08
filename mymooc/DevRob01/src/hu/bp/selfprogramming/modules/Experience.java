@@ -12,29 +12,60 @@ import java.util.Map;
 
 /**
  * Experience is a collection of experiments and a selection and learning mechanism
+ * 
+ * It is the knowledge of the robot about the environment(World)
+ * @author Peter Borkuti
+ *
+ */
+/**
  * @author Peter Borkuti
  *
  */
 public class Experience {
-	private final Map<String, Experiment> experiments;
+	/**
+	 * Memory of the robot about past experiments
+	 */
+	private final Map<String, Experiment> experiments
+		= new HashMap<String, Experiment>();
 
-	public Experience(Map<String, Experiment> e) {
+	/**
+	 * Serial memory of the past experiments in order of time
+	 * The last primitive interaction is on the right side
+	 */
+	private final StringBuilder interactions = new StringBuilder();
+
+	public Experience(Map<String, Experiment> e, String pastInteractions) {
 		experiments = e;
+		interactions.append(pastInteractions);
 	}
 
-	public Experience(List<PrimitiveInteraction> interactions) {
+	public Experience(Map<String, Experiment> e) {
+		this(e, "");
+	}
+
+	public Experience(List<PrimitiveInteraction> newInteractions,
+			String pastInteractions) {
+
 		experiments = new HashMap<String, Experiment>();
 
-		for (PrimitiveInteraction i: interactions) {
+		for (PrimitiveInteraction i: newInteractions) {
 			Experiment e = new Experiment(i);
 			experiments.put(i.interaction, e);
 		}
+
+		interactions = new StringBuilder(pastInteractions);
 	}
 
 	public Experience() {
 		experiments = new HashMap<String, Experiment>();
+		interactions = new StringBuilder();
 	}
 
+	/**
+	 * Robot stores newExperiments in its memory
+	 * 
+	 * @param newExperiments
+	 */
 	public void learn(List<Experiment> newExperiments) {
 		for (Experiment e: newExperiments) {
 			System.out.println("learn" + e);

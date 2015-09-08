@@ -5,12 +5,13 @@ import hu.bp.common.World;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 public class Experiment {
 
-	public final List<PrimitiveInteraction> experiment;
+	public final ImmutableList<PrimitiveInteraction> experiment;
 
 	public final int valence;
 
@@ -36,10 +37,9 @@ public class Experiment {
 
 	public Experiment(List<PrimitiveInteraction> experiment) {
 		super();
-		this.experiment = new ArrayList<PrimitiveInteraction>();
-		for (PrimitiveInteraction i: experiment) {
-			this.experiment.add(new PrimitiveInteraction(i.experiment, i.result, i.valence));
-		}
+		this.experiment =
+			new ImmutableList.Builder<PrimitiveInteraction>()
+				.addAll(experiment).build();
 
 		StringBuilder key =
 			new StringBuilder(this.experiment.size() * PrimitiveInteraction.length);
@@ -83,50 +83,31 @@ public class Experiment {
 	 * @param w
 	 * @return
 	 */
-	public Experiment enact(final World w, final PrimitiveInteractions pis, final List<Experiment> newExperiments) {
+	public Experiment enact(final World w, final PrimitiveInteractions pis,
+			final List<Experiment> newExperiments) {
+
 		List<PrimitiveInteraction> enactedExperimentList =
 			new ArrayList<PrimitiveInteraction>();
 
-		if (isPrimitiveInteraction()) {
-			PrimitiveInteraction intended = experiment.get(0);
+		for (int i = 0; i < experiment.size(); i++) {
+			boolean failed =
+				enactPrimitiveInteraction(
+					w, experiment.get(i), pis, enactedExperimentList,
+					newExperiments);
 
-			String result = w.getResult(intended.experiment);
-
-			PrimitiveInteraction enacted = pis.get(intended.experiment, result);
-
-			enactedExperimentList.add(enacted);
-			newExperiments.add(new Experiment(enacted, true));
-			if (!intended.equals(enacted)) {
-				newExperiments.add(new Experiment(intended, false));
-			}
 		}
-		else {
-			int i = 1;
-			boolean failed = false;
 
-			while (!failed && i < experiment.size()) {
-				PrimitiveInteraction intended = experiment.get(i);
-
-				String result = w.getResult(intended.experiment);
-
-				PrimitiveInteraction enacted = pis.get(intended.experiment, result);
-
-				enactedExperimentList.add(enacted);
-
-				if (!intended.equals(enacted)) {
-					failed = true;
-				}
-
-				i++;
-			}
-			if (failed) {
+			if (failed && !isPrimitiveInteraction() && i < ) {
 				if (i < experiment.size()) {
-				Experiment failedExperiment =
-					new Experiment(experiment.get(i - 1), experiment.get(i));
-				newExperiments.addAll(
-					getFailedSubExperiments(
-						experiment.subList(0, i + 1), failedExperiment));
+					Experiment failedExperiment =
+						new Experiment(experiment.get(i - 1), experiment.get(i));
+	
+					newExperiments.addAll(
+						getFailedSubExperiments(
+							experiment.subList(0, i + 1), failedExperiment));
+				}
 			}
+
 			newExperiments.addAll(
 				getSubExperiments(enactedExperimentList, null, true));
 		}
@@ -135,6 +116,25 @@ public class Experiment {
 		return new Experiment(enactedExperimentList);
 	}
 
+	private boolean enactPrimitiveInteraction(World w,
+			PrimitiveInteraction intended,
+			PrimitiveInteractions pis, List<PrimitiveInteraction> enactedExperimentList,
+			List<Experiment> newExperiments) {
+
+		String result = w.getResult(intended.experiment);
+
+		PrimitiveInteraction enacted = pis.get(intended.experiment, result);
+
+		enactedExperimentList.add(enacted);
+
+		newExperiments.add(new Experiment(enacted, true));
+
+		if (!intended.equals(enacted)) {
+			newExperiments.add(new Experiment(intended, false));
+		}
+
+		return !intended.equals(enacted);
+	}
 
 	public static List<Experiment> getSubExperiments(
 			List<PrimitiveInteraction> list, String filter, boolean success) {
@@ -172,7 +172,6 @@ public class Experiment {
 	public void updateTried() {
 		tried++;
 	}
-
 
 	public void updateSuccess(boolean successful) {
 		success += (successful) ? 1 : -1;
@@ -223,5 +222,5 @@ public class Experiment {
 		return true;
 	}
 
-	
+
 }

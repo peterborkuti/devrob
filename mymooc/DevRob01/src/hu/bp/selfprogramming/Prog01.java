@@ -12,6 +12,7 @@ import hu.bp.pattern.PatternFinder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,7 +175,7 @@ public class Prog01 extends AbstractProgram {
 			// store experiments with the same actual maximum proclivity
 			if (Math.abs(proclivity - maxProclivity) <= 0.1) {
 				experiment =
-						new SelectedExperiment(interaction, proclivity, occurence);
+					new SelectedExperiment(interaction, proclivity, occurence);
 				expList.add(experiment);
 				/*
 				System.out.println(
@@ -196,13 +197,14 @@ public class Prog01 extends AbstractProgram {
 
 		Map<String, Integer> proposes = new HashMap<String, Integer>();
 
-		List<String> dInt = new ArrayList<String>(Arrays.asList(defaultInteractions));
+		List<String> dInt =
+			new ArrayList<String>(Arrays.asList(defaultInteractions));
 
 		// default primitive interactions in random order to not to choose
 		// the same in every time
-		for (int i = 0; i < defaultInteractions.length; i++) {
-			int index = (int) Math.floor(Math.random() * dInt.size());
-			proposes.put(dInt.remove(index), 0);
+		Collections.shuffle(dInt);
+		for (String defaultInt: dInt) {
+			proposes.put(defaultInt, 0);
 		}
 
 		// all the possible complex interactions, which can led to 
