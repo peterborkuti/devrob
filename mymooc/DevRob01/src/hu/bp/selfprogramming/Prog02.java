@@ -9,6 +9,7 @@ import hu.bp.common.ThreeStepWorld;
 import hu.bp.common.World;
 import hu.bp.selfprogramming.modules.Experience;
 import hu.bp.selfprogramming.modules.Experiment;
+import hu.bp.selfprogramming.modules.ExperimentUtils;
 import hu.bp.selfprogramming.modules.PrimitiveInteraction;
 import hu.bp.selfprogramming.modules.PrimitiveInteractions;
 
@@ -25,7 +26,6 @@ public class Prog02 extends AbstractProgram {
 	private Experience experience;
 	private int counter;
 	private int counterPleased,counterPained;
-	private List<PrimitiveInteraction> memory;
 
 	@Override
 	protected void init() {
@@ -39,9 +39,8 @@ public class Prog02 extends AbstractProgram {
 		valences.add(new PrimitiveInteraction("e1","r2", 1));
 		valences.add(new PrimitiveInteraction("e2","r2", 1));
 		pis = new PrimitiveInteractions(valences);
-		experience = new Experience(valences);
+		experience = new Experience(valences, "");
 		counter = 0;
-		memory = new ArrayList<PrimitiveInteraction>();
 	}
 
 	@Override
@@ -51,13 +50,10 @@ public class Prog02 extends AbstractProgram {
 
 		List<Experiment> newExperiences = new ArrayList<Experiment>();
 
-		Experiment enactedExperiment = experiment.enact(world, pis, newExperiences);
+		Experiment enactedExperiment =
+			ExperimentUtils.enact(experiment, world, pis, newExperiences);
 
 		experience.learn(newExperiences);
-
-		memory.addAll(enactedExperiment.experiment);
-
-		experience.learn(Experiment.getSubExperiments(memory, null, true));
 
 		if (enactedExperiment.valence >= 0) {
 			if (mood != PLEASED) counter = 0;

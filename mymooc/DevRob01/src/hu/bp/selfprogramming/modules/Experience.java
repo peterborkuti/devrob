@@ -17,13 +17,11 @@ import java.util.Map;
  * @author Peter Borkuti
  *
  */
-/**
- * @author Peter Borkuti
- *
- */
 public class Experience {
 	/**
 	 * Memory of the robot about past experiments
+	 * The key of the map is the Experiment.key
+	 * @see Experiment.key
 	 */
 	private final Map<String, Experiment> experiments
 		= new HashMap<String, Experiment>();
@@ -35,7 +33,7 @@ public class Experience {
 	private final StringBuilder interactions = new StringBuilder();
 
 	public Experience(Map<String, Experiment> e, String pastInteractions) {
-		experiments = e;
+		experiments.putAll(e);
 		interactions.append(pastInteractions);
 	}
 
@@ -46,19 +44,10 @@ public class Experience {
 	public Experience(List<PrimitiveInteraction> newInteractions,
 			String pastInteractions) {
 
-		experiments = new HashMap<String, Experiment>();
+		Experiment newExperiment = new Experiment(newInteractions);
+		experiments.put(newExperiment.key, newExperiment);
 
-		for (PrimitiveInteraction i: newInteractions) {
-			Experiment e = new Experiment(i);
-			experiments.put(i.interaction, e);
-		}
-
-		interactions = new StringBuilder(pastInteractions);
-	}
-
-	public Experience() {
-		experiments = new HashMap<String, Experiment>();
-		interactions = new StringBuilder();
+		interactions.append(pastInteractions);
 	}
 
 	/**
