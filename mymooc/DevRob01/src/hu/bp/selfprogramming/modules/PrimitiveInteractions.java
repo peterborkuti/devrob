@@ -1,11 +1,13 @@
 package hu.bp.selfprogramming.modules;
 
 import hu.bp.annotation.Immutable;
+import hu.bp.common.Utils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -44,11 +46,37 @@ public class PrimitiveInteractions {
 	 * @return the primitive interaction
 	 */
 	public PrimitiveInteraction get(String experiment, String result) {
-		String key = experiment + result;
-		PrimitiveInteraction i = interactions.get(key);
+		return get(experiment + result);
+	}
+
+	/**
+	 * Returns with a PrimitiveInteraction based on the string concatenation
+	 * of experience+result.
+	 * 
+	 * It basically adds the valence to an [experiment, result] touple
+	 * @param experiment
+	 * @param result
+	 * @return the primitive interaction
+	 */
+	public PrimitiveInteraction get(String interaction) {
+		PrimitiveInteraction i = interactions.get(interaction);
 
 		//Don't let elements escape
-		return new PrimitiveInteraction(experiment, result, i.valence);
+		return new PrimitiveInteraction(i.experiment, i.result, i.valence);
+	}
+
+	/**
+	 * Returns with a random primitive interaction
+	 * 
+	 * @return
+	 */
+	public PrimitiveInteraction getRandom() {
+		ImmutableCollection<PrimitiveInteraction> keys = interactions.values();
+
+		PrimitiveInteraction i = Utils.getRandomElement(keys.asList());
+
+		//Don't let elements escape
+		return new PrimitiveInteraction(i.experiment, i.result, i.valence);
 	}
 
 }

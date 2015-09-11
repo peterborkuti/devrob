@@ -32,6 +32,8 @@ public class Experience {
 	 */
 	private final StringBuilder interactions = new StringBuilder();
 
+	public Experience() { }
+
 	public Experience(Map<String, Experiment> e, String pastInteractions) {
 		experiments.putAll(e);
 		interactions.append(pastInteractions);
@@ -62,7 +64,7 @@ public class Experience {
 		}
 	}
 
-	public Experiment getBestExperiment() {
+	public Experiment getBestExperiment(PrimitiveInteractions pis) {
 		long maxProclivity = Integer.MIN_VALUE;
 		List<Experiment> bestExperiences = new ArrayList<Experiment>();
 
@@ -76,14 +78,16 @@ public class Experience {
 			}
 		}
 
+		if (bestExperiences.size() == 0) {
+			
+			return new Experiment(pis.getRandom());
+		}
+
 		Experiment e = Utils.getRandomElement(bestExperiences);
 
 		//Do not let experiments escape
-		if (e != null) {
-			e = new Experiment(e);
-		}
+		return new Experiment(e);
 
-		return e;
 	}
 
 	private void updateExperiment(Experiment e) {
@@ -94,14 +98,24 @@ public class Experience {
 				experiments.put(e.key, e);
 			}
 		}
-		else if (!e.isPrimitiveInteraction()){
+		else /*if (!e.isPrimitiveInteraction())*/{
 			experiment.updateTried();
 			experiment.updateSuccess(e.isSuccess());
 		}
 	}
 
+	public PrimitiveInteraction getLast(PrimitiveInteractions pis) {
+		if (interactions.length() < PrimitiveInteraction.length) {
+			return null;
+		}
+
+		return pis.get(
+			interactions.substring(
+				interactions.length() - PrimitiveInteraction.length));
+	}
+
 	public String toString() {
-		String s = "";
+		String s = "Experience:";
 		for (String key: experiments.keySet()) {
 			s += (key + ":" + experiments.get(key)) + "\n";
 		}

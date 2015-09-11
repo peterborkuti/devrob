@@ -6,6 +6,7 @@ import static hu.bp.common.Mood.PLEASED;
 import hu.bp.common.AbstractProgram;
 import hu.bp.common.Mood;
 import hu.bp.common.ThreeStepWorld;
+import hu.bp.common.Utils;
 import hu.bp.common.World;
 import hu.bp.selfprogramming.modules.Experience;
 import hu.bp.selfprogramming.modules.Experiment;
@@ -39,19 +40,31 @@ public class Prog02 extends AbstractProgram {
 		valences.add(new PrimitiveInteraction("e1","r2", 1));
 		valences.add(new PrimitiveInteraction("e2","r2", 1));
 		pis = new PrimitiveInteractions(valences);
-		experience = new Experience(valences, "");
+		experience = new Experience();
 		counter = 0;
 	}
 
 	@Override
 	protected void doOneStep(int step) {
-
-		Experiment experiment = experience.getBestExperiment();
-
 		List<Experiment> newExperiences = new ArrayList<Experiment>();
 
-		Experiment enactedExperiment =
-			ExperimentUtils.enact(experiment, world, pis, newExperiences);
+		Experiment enactedExperiment;
+		Experiment experiment;
+
+		if (step == 0) {
+			experiment = new Experiment(pis.getRandom());
+
+			enactedExperiment =
+				new Experiment(ExperimentUtils.enactPrimitiveInteraction(
+					world, experiment.experiment.get(0), pis, newExperiences));
+		}
+		else {
+			experiment = experience.getBestExperiment(pis);
+	
+			enactedExperiment =
+				ExperimentUtils.enact(
+					experience.getLast(pis), experiment, world, pis, newExperiences);
+		}
 
 		experience.learn(newExperiences);
 

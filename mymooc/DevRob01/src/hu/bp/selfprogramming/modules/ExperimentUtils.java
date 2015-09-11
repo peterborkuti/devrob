@@ -21,32 +21,43 @@ public class ExperimentUtils {
 	 * @param w
 	 * @return
 	 */
-	public static Experiment enact(final Experiment experiment,
+	public static Experiment enact(final PrimitiveInteraction lastEnaction,
+			final Experiment experiment,
 			final World w, final PrimitiveInteractions pis,
 			final List<Experiment> newExperiments) {
 
 		List<PrimitiveInteraction> enactedExperimentList =
 			new ArrayList<PrimitiveInteraction>();
 
-		for (int i = 0; i < experiment.experiment.size(); i++) {
-			boolean failed =
+		if (lastEnaction != null) {
+			enactedExperimentList.add(lastEnaction);
+		}
+
+		PrimitiveInteraction prevEnaction = lastEnaction;
+
+		boolean failed = false;
+
+		for (int i = 0; !failed && i < experiment.experiment.size(); i++) {
+			PrimitiveInteraction intended = experiment.experiment.get(i);
+
+			failed =
 				enactPrimitiveInteraction(
-					w, experiment.experiment.get(i), pis, enactedExperimentList,
+					w, intended, pis, enactedExperimentList,
 					newExperiments);
 
-			if (failed && !experiment.isPrimitiveInteraction() && i < experiment.experiment.size()) {
-				if (i < experiment.experiment.size()) {
+			if (failed && prevEnaction != null) {
 					Experiment failedExperiment =
-						new Experiment(experiment.experiment.get(i - 1), experiment.experiment.get(i));
-	
+						new Experiment(prevEnaction, intended);
+
 					newExperiments.addAll(
 						getFailedSubExperiments(
 							experiment.experiment.subList(0, i + 1), failedExperiment));
-				}
 			}
 
 			newExperiments.addAll(
 				getSubExperiments(enactedExperimentList, null, true));
+
+			prevEnaction = intended;
 		}
 
 		//Just to be sure not escape Anything
@@ -68,11 +79,30 @@ public class ExperimentUtils {
 			final List<PrimitiveInteraction> enactedExperimentList,
 			final List<Experiment> newExperiments) {
 
+		PrimitiveInteraction enacted =
+			enactPrimitiveInteraction(w, intended, pis, newExperiments);
+
+		enactedExperimentList.add(enacted);
+
+		return !intended.equals(enacted);
+	}
+
+	/**
+	 * Enacts a primitive interaction (intended).
+	 * @param w
+	 * @param intended the interaction to enact
+	 * @param pis default primitive interactions
+	 * @param newExperiments
+	 * @return the enacted interaction
+	 */
+	public static PrimitiveInteraction enactPrimitiveInteraction(final World w,
+			final PrimitiveInteraction intended,
+			final PrimitiveInteractions pis,
+			final List<Experiment> newExperiments) {
+
 		String result = w.getResult(intended.experiment);
 
 		PrimitiveInteraction enacted = pis.get(intended.experiment, result);
-
-		enactedExperimentList.add(enacted);
 
 		newExperiments.add(new Experiment(enacted, true));
 
@@ -80,7 +110,7 @@ public class ExperimentUtils {
 			newExperiments.add(new Experiment(intended, false));
 		}
 
-		return !intended.equals(enacted);
+		return enacted;
 	}
 
 	public static List<Experiment> getSubExperiments(
