@@ -34,6 +34,12 @@ public class Experience {
 	 */
 	private final StringBuilder interactions = new StringBuilder();
 
+	/**
+	 * The length (number of primitive interactions) of the
+	 * longest learned experiment
+	 */
+	private int maxExperimentLength = 0;
+
 	public Experience() { }
 
 	public Experience(Map<String, Experiment> e, String pastInteractions) {
@@ -78,6 +84,7 @@ public class Experience {
 	}
 
 	public Experiment getBestExperiment(PrimitiveInteractions pis) {
+		
 		long maxProclivity = Integer.MIN_VALUE;
 		List<Experiment> bestExperiences = new ArrayList<Experiment>();
 
@@ -107,8 +114,13 @@ public class Experience {
 		Experiment experiment = experiments.get(e.key);
 
 		if (experiment == null) {
-			if ((e.valence >= 0 && !e.isPrimitiveInteraction())) {
+			if ((e.getValence() >= 0 && !e.isPrimitiveInteraction())) {
 				experiments.put(e.key, e);
+
+				//remember for the maximum length of experiment
+				if (maxExperimentLength < e.experiment.size()) {
+					maxExperimentLength = e.experiment.size();
+				}
 			}
 		}
 		else if (!e.isPrimitiveInteraction()) {
@@ -144,7 +156,7 @@ public class Experience {
 	}
 
 	public String toString() {
-		String s = "Experience:";
+		String s = "Experience: maxLen:" + maxExperimentLength;
 		for (String key: experiments.keySet()) {
 			s += (key + ":" + experiments.get(key)) + "\n";
 		}

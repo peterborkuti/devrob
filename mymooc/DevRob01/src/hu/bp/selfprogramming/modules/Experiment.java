@@ -1,6 +1,7 @@
 package hu.bp.selfprogramming.modules;
 
 import hu.bp.annotation.Immutable;
+import hu.bp.common.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,8 +17,26 @@ public class Experiment {
 	@Immutable
 	public final ImmutableList<PrimitiveInteraction> experiment;
 
-	@Immutable
-	public final int valence;
+	/**
+	 * The valence of this experiment in a real-life situation
+	 * This is the sum of the valences of the intended primitive
+	 * interactions from this experience
+	 */
+	private int valence;
+
+	public int getValence() {
+		return valence;
+	}
+
+	public void setValence(int startIndex) {
+		int v = 0;
+		for (int i = startIndex; i < experiment.size(); i++) {
+			v += experiment.get(i).valence;
+		}
+
+		this.valence = v;
+		this.proclivity = v * startIndex * success;
+	}
 
 	/**
 	 * The concatenated list of interactions
@@ -31,6 +50,13 @@ public class Experiment {
 	private int success = 0;
 
 	private int tried = 0;
+
+	/**
+	 * How much fits this experiment into the immediate past
+	 * How many primitive interactions fits to each other from the
+	 * past enacted interactions and from the left of this experiment
+	 */
+	private int match = 0;
 
 	public Experiment(PrimitiveInteraction i) {
 		this(new ArrayList<PrimitiveInteraction>(Arrays.asList(i)));
@@ -63,6 +89,14 @@ public class Experiment {
 		this.key = key.toString();
 	}
 
+	public Experiment(String interactions, PrimitiveInteractions pis) {
+		List<String> ints =
+			Utils.splitBy(interactions, PrimitiveInteraction.LENGTH);
+
+		List<PrimitiveInteraction> 
+	
+	}
+
 	public Experiment(List<PrimitiveInteraction> experiment, boolean success) {
 		this(experiment);
 
@@ -79,19 +113,12 @@ public class Experiment {
 		return experiment.size() == 1;
 	}
 
-
 	public void updateTried() {
 		tried++;
 	}
 
 	public void updateSuccess(boolean successful) {
 		success += (successful) ? 1 : -1;
-		if (success == 0) {
-			proclivity = valence;
-		}
-		else {
-			proclivity = success * valence;
-		}
 	}
 
 	public long getProclivity() {
@@ -131,6 +158,14 @@ public class Experiment {
 			return false;
 		}
 		return true;
+	}
+
+	public int getMatch() {
+		return match;
+	}
+
+	public void setMatch(int match) {
+		this.match = match;
 	}
 
 

@@ -1,10 +1,12 @@
 package hu.bp.selfprogramming.modules;
 
+import hu.bp.common.Utils;
 import hu.bp.common.World;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class ExperimentUtils {
 
@@ -144,6 +146,42 @@ public class ExperimentUtils {
 
 		return getSubExperiments(
 			actedPartOfIintendedExperiment, failedExperiment.key, false);
+	}
+
+	/**
+	 * Find matching experiments for the given primitive interactions
+	 * 
+	 * An experiment matches to a series of primitive interactions, if
+	 * the last interactions fits to the beginning of an experiment.
+	 * 
+	 * In this situation, an experiment is good for anticipate future
+	 * interactions. The better the fit, the better the anticipation is
+	 * 
+	 * The returned experiments will be set its match field with the number of
+	 * fitted primitive interactions 
+	 * 
+	 * Usage: 
+	 * @param key the enacted primitive interactions
+	 * @param experiments the stored experiments
+	 * @return list of best-fit experiments
+	 */
+	public static List<Experiment> match(String key,
+			Map<String, Experiment> experiments) {
+
+		List<Experiment> found = new ArrayList<Experiment>();
+		String[] holes = experiments.keySet().toArray(new String[0]);
+
+		for (String hole: holes) {
+			int size = Utils.bestFitSize(key, hole);
+
+			if (size > 0) {
+				Experiment e = new Experiment(experiments.get(hole));
+				e.setMatch(size);
+				found.add(e);
+			}
+		}
+
+		return found;
 	}
 
 

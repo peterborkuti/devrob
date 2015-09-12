@@ -3,6 +3,7 @@ package hu.bp.selfprogramming.modules;
 import hu.bp.annotation.Immutable;
 import hu.bp.common.Utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -75,6 +76,19 @@ public class PrimitiveInteractions {
 	 */
 	public PrimitiveInteraction get(String experiment, String result) {
 		return get(experiment + result);
+	}
+
+	public List<PrimitiveInteraction> createList(String interactions) {
+		List<String> ints =
+			Utils.splitBy(interactions, PrimitiveInteraction.LENGTH);
+
+		List<PrimitiveInteraction> pis = new ArrayList<PrimitiveInteraction>();
+
+		for (String i: ints) {
+			pis.add(get(i));
+		}
+
+		return pis;
 	}
 
 	/**
