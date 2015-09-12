@@ -3,9 +3,13 @@ package hu.bp.selfprogramming.modules;
 import hu.bp.annotation.Immutable;
 import hu.bp.common.Utils;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
@@ -22,7 +26,7 @@ import com.google.common.collect.ImmutableMap;
 
 @Immutable
 public class PrimitiveInteractions {
-	private final ImmutableMap<String, PrimitiveInteraction> interactions;
+	public final ImmutableMap<String, PrimitiveInteraction> interactions;
 
 	public PrimitiveInteractions(List<PrimitiveInteraction> pis) {
 		Map<String, PrimitiveInteraction>interactions =
@@ -35,6 +39,30 @@ public class PrimitiveInteractions {
 		this.interactions =
 			new ImmutableMap.Builder<String, PrimitiveInteraction>().
 				putAll(interactions).build();
+	}
+
+	public PrimitiveInteractions(Set<PrimitiveInteraction> pis) {
+		this(Arrays.asList(pis.toArray(new PrimitiveInteraction[0])));
+	}
+
+	public PrimitiveInteractions(String[] positive, String[] negative) {
+		this(addSet(createSet(positive, 1), negative, -1));
+	}
+
+	private static Set<PrimitiveInteraction> createSet(String[] s, int valence) {
+		Set<PrimitiveInteraction> pis = new HashSet<PrimitiveInteraction>();
+
+		return addSet(pis, s, valence);
+	}
+
+	private static Set<PrimitiveInteraction> addSet(
+			Set<PrimitiveInteraction> pis, String[] s, int valence) {
+
+		for (String ss : s) {
+			pis.add(new PrimitiveInteraction(ss, valence));
+		}
+
+		return pis;
 	}
 
 	/**

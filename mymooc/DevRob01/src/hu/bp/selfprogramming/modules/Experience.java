@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * Experience is a collection of experiments and a selection and learning mechanism
  * 
@@ -54,10 +56,21 @@ public class Experience {
 
 	/**
 	 * Robot stores newExperiments in its memory
+	 * @param enactedExperiment 
 	 * 
 	 * @param newExperiments
 	 */
-	public void learn(List<Experiment> newExperiments) {
+	public void learn(Experiment enactedExperiment, List<Experiment> newExperiments) {
+		if (enactedExperiment == null) {
+			return;
+		}
+
+		interactions.append(enactedExperiment.key);
+
+		if (newExperiments == null) {
+			return;
+		}
+
 		for (Experiment e: newExperiments) {
 			System.out.println("learn" + e);
 			updateExperiment(e);
@@ -98,20 +111,36 @@ public class Experience {
 				experiments.put(e.key, e);
 			}
 		}
-		else /*if (!e.isPrimitiveInteraction())*/{
+		else if (!e.isPrimitiveInteraction()) {
 			experiment.updateTried();
 			experiment.updateSuccess(e.isSuccess());
 		}
 	}
 
+	/**
+	 * Gets the last enacted primitive interaction
+	 * 
+	 * @param pis
+	 * @return null if there was not interaction stored
+	 */
 	public PrimitiveInteraction getLast(PrimitiveInteractions pis) {
-		if (interactions.length() < PrimitiveInteraction.length) {
+		if (interactions.length() < PrimitiveInteraction.LENGTH) {
 			return null;
 		}
 
 		return pis.get(
 			interactions.substring(
-				interactions.length() - PrimitiveInteraction.length));
+				interactions.length() - PrimitiveInteraction.LENGTH));
+	}
+
+	public String getInteractions() {
+		return interactions.toString();
+	}
+
+	public ImmutableMap<String, Experiment> getExperiments() {
+		return 
+			new ImmutableMap.Builder<String, Experiment>()
+				.putAll(experiments).build();
 	}
 
 	public String toString() {

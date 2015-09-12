@@ -51,7 +51,7 @@ public class Experiment {
 				.addAll(experiment).build();
 
 		StringBuilder key =
-			new StringBuilder(this.experiment.size() * PrimitiveInteraction.length);
+			new StringBuilder(this.experiment.size() * PrimitiveInteraction.LENGTH);
 
 		int valence = 0;
 		for (PrimitiveInteraction i : experiment) {

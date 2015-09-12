@@ -22,7 +22,7 @@ public class Prog02 extends AbstractProgram {
 	Mood mood;
 	World world;
 	private static final int PAIN_LIMIT = 2;
-	private static final int PLEASED_LIMIT = 4;
+	private static final int PLEASED_LIMIT = 1000;
 	private PrimitiveInteractions pis;
 	private Experience experience;
 	private int counter;
@@ -66,7 +66,7 @@ public class Prog02 extends AbstractProgram {
 					experience.getLast(pis), experiment, world, pis, newExperiences);
 		}
 
-		experience.learn(newExperiences);
+		experience.learn(enactedExperiment, newExperiences);
 
 		if (enactedExperiment.valence >= 0) {
 			if (mood != PLEASED) counter = 0;

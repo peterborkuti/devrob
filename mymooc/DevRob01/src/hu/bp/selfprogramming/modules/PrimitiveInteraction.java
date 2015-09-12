@@ -18,7 +18,7 @@ public class PrimitiveInteraction {
 	/**
 	 * The length of the [experience, result] touple as a string
 	 */
-	public final static int length = 4;
+	public final static int LENGTH = 4;
 	/**
 	 * The experimet, like "e1", "e2", etc.
 	 */
@@ -50,6 +50,13 @@ public class PrimitiveInteraction {
 		interaction = experiment + result;
 
 		hashValue = (interaction).hashCode();
+	}
+
+	public PrimitiveInteraction(String interaction, int valence) {
+		this(
+			interaction.substring(0, LENGTH / 2),
+			interaction.substring(LENGTH / 2),
+			valence);
 	}
 
 	@Override
