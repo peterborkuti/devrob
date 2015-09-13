@@ -1,7 +1,6 @@
 package hu.bp.selfprogramming.modules;
 
 import hu.bp.annotation.Immutable;
-import hu.bp.common.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,11 +89,7 @@ public class Experiment {
 	}
 
 	public Experiment(String interactions, PrimitiveInteractions pis) {
-		List<String> ints =
-			Utils.splitBy(interactions, PrimitiveInteraction.LENGTH);
-
-		List<PrimitiveInteraction> 
-	
+		this(pis.createList(interactions));
 	}
 
 	public Experiment(List<PrimitiveInteraction> experiment, boolean success) {

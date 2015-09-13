@@ -39,12 +39,15 @@ public class ExperienceTest {
 	@Test
 	public void testLearn() {
 		Experience e = new Experience();
-		System.out.println(e.toString());
+
+		assertEquals(0, e.getExperiments().size());
+		assertEquals(0, e.getInteractions().length());
 
 		Experiment enacted = new Experiment(p11);
 		e.learn(enacted, null);
 
-		System.out.println(e.toString());
+		assertEquals(0, e.getExperiments().size());
+		assertEquals(PrimitiveInteraction.LENGTH, e.getInteractions().length());
 
 		enacted = new Experiment(p12);
 
@@ -52,12 +55,12 @@ public class ExperienceTest {
 		Experiment newE = new Experiment(p11, p11);
 		t1.add(newE);
 
-		e.learn(enacted, t1);
+		e.learn(enacted, pis);
 
-		System.out.println(e.toString());
+		System.out.println("2." + e.toString());
 
-		e.learn(enacted, t1);
-		System.out.println(e.toString());
+		e.learn(enacted, pis);
+		System.out.println("3." + e.toString());
 	}
 
 	@Test

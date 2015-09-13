@@ -66,9 +66,9 @@ public class Prog02 extends AbstractProgram {
 					experience.getLast(pis), experiment, world, pis, newExperiences);
 		}
 
-		experience.learn(enactedExperiment, newExperiences);
+		experience.learn(enactedExperiment, pis);
 
-		if (enactedExperiment.valence >= 0) {
+		if (enactedExperiment.getValence() >= 0) {
 			if (mood != PLEASED) counter = 0;
 			mood = PLEASED;
 			counterPleased++;
@@ -89,7 +89,7 @@ public class Prog02 extends AbstractProgram {
 		}
 		System.out.println(
 			(step + "   ").substring(0, 4) + ":" +
-			"(" + counterPleased + "/" + counterPained + ")" +
+			"(Pleased:" + counterPleased + "/Pained:" + counterPained + ")" +
 			(mood +"   ").substring(0, 8) + it);
 		System.out.println(experience);
 	}

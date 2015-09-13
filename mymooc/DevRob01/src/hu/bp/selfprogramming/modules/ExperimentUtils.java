@@ -169,14 +169,25 @@ public class ExperimentUtils {
 			Map<String, Experiment> experiments) {
 
 		List<Experiment> found = new ArrayList<Experiment>();
+
+		if (key == null || "".equals(key) || experiments == null ||
+				experiments.size() == 0) {
+
+			return found;
+		}
+
 		String[] holes = experiments.keySet().toArray(new String[0]);
 
 		for (String hole: holes) {
-			int size = Utils.bestFitSize(key, hole);
+			int size =
+				Utils.bestFitSize(key, hole);
 
-			if (size > 0) {
+			if ((size > 0) &&
+				// if there is no not-match part on the right side of the
+				// hole (fits all), it is not valuable to predict interactions
+				(size < hole.length())) {
 				Experiment e = new Experiment(experiments.get(hole));
-				e.setMatch(size);
+				e.setMatch(size / PrimitiveInteraction.LENGTH);
 				found.add(e);
 			}
 		}

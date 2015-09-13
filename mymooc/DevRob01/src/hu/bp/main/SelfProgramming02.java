@@ -17,7 +17,7 @@ public class SelfProgramming02 {
 	 */
 	public static void main(String[] args) {
 		Program prog = new Prog02();
-		prog.doProgram(300);
+		prog.doProgram(10);
 	}
 
 }

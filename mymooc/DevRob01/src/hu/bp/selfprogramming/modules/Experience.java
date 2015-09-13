@@ -20,6 +20,8 @@ import com.google.common.collect.ImmutableMap;
  *
  */
 public class Experience {
+	private static final int MAX_EXPERIMENT_SIZE = 7;
+
 	/**
 	 * Memory of the robot about past experiments
 	 * The key of the map is the Experiment.key
@@ -66,7 +68,9 @@ public class Experience {
 	 * 
 	 * @param newExperiments
 	 */
+	/*
 	public void learn(Experiment enactedExperiment, List<Experiment> newExperiments) {
+		//System.out.println("learn:" + enactedExperiment + "," + newExperiments);
 		if (enactedExperiment == null) {
 			return;
 		}
@@ -78,17 +82,49 @@ public class Experience {
 		}
 
 		for (Experiment e: newExperiments) {
+			//System.out.println("learn" + e);
+			updateExperiment(e);
+		}
+	}
+	*/
+
+	/**
+	 * Robot stores newExperiments in its memory
+	 * @param enactedExperiment 
+	 * 
+	 * @param newExperiments
+	 */
+	public void learn(Experiment enactedExperiment, PrimitiveInteractions pis) {
+		System.out.println("learn:" + enactedExperiment);
+		if (enactedExperiment == null) {
+			return;
+		}
+
+		interactions.append(enactedExperiment.key);
+
+		if (interactions.length() <= PrimitiveInteraction.LENGTH * 2) {
+			return;
+		}
+
+		for (int i = interactions.length() - 2 * PrimitiveInteraction.LENGTH;
+			i >= 0; i -= PrimitiveInteraction.LENGTH) {
+
+			Experiment e =
+				new Experiment(interactions.substring(i, interactions.length()), pis);
+
 			System.out.println("learn" + e);
 			updateExperiment(e);
 		}
 	}
 
 	public Experiment getBestExperiment(PrimitiveInteractions pis) {
-		
+		List<Experiment> found =
+			ExperimentUtils.match(getInteractions(), experiments);
+
 		long maxProclivity = Integer.MIN_VALUE;
 		List<Experiment> bestExperiences = new ArrayList<Experiment>();
 
-		for (Experiment e: experiments.values()) {
+		for (Experiment e: found) {
 			if (e.getProclivity() > maxProclivity) {
 				bestExperiences.clear();
 				maxProclivity = e.getProclivity();
@@ -111,10 +147,14 @@ public class Experience {
 	}
 
 	private void updateExperiment(Experiment e) {
+		if (e.experiment.size() > MAX_EXPERIMENT_SIZE) {
+			return;
+		}
+
 		Experiment experiment = experiments.get(e.key);
 
 		if (experiment == null) {
-			if ((e.getValence() >= 0 && !e.isPrimitiveInteraction())) {
+			if ((/* e.getValence() >= 0 && */ !e.isPrimitiveInteraction())) {
 				experiments.put(e.key, e);
 
 				//remember for the maximum length of experiment
@@ -156,7 +196,8 @@ public class Experience {
 	}
 
 	public String toString() {
-		String s = "Experience: maxLen:" + maxExperimentLength;
+		String s = "Experience: maxLen:" + maxExperimentLength + "\n";
+		s += "interactions:" + interactions + "\n";
 		for (String key: experiments.keySet()) {
 			s += (key + ":" + experiments.get(key)) + "\n";
 		}
