@@ -39,7 +39,9 @@ public class ExperimentUtils {
 
 		boolean failed = false;
 
-		for (int i = 0; !failed && i < experiment.experiment.size(); i++) {
+		for (int i = experiment.getMatch();
+			!failed && i < experiment.experiment.size(); i++) {
+
 			PrimitiveInteraction intended = experiment.experiment.get(i);
 
 			failed =

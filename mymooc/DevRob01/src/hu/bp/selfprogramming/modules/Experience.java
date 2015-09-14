@@ -95,24 +95,34 @@ public class Experience {
 	 * @param newExperiments
 	 */
 	public void learn(Experiment enactedExperiment, PrimitiveInteractions pis) {
-		System.out.println("learn:" + enactedExperiment);
 		if (enactedExperiment == null) {
 			return;
 		}
 
 		interactions.append(enactedExperiment.key);
 
-		if (interactions.length() <= PrimitiveInteraction.LENGTH * 2) {
+		if (interactions.length() < PrimitiveInteraction.LENGTH * 2) {
 			return;
 		}
 
-		for (int i = interactions.length() - 2 * PrimitiveInteraction.LENGTH;
-			i >= 0; i -= PrimitiveInteraction.LENGTH) {
+		if (pis == null) {
+			return;
+		}
 
+		System.out.println("Learn:" + enactedExperiment);
+
+		int startPos = interactions.length() - 2 * PrimitiveInteraction.LENGTH;
+		int endPos =
+			Math.max(
+				0,
+				interactions.length() - MAX_EXPERIMENT_SIZE *
+					PrimitiveInteraction.LENGTH);
+
+		for (int i = startPos; i >= endPos; i -= PrimitiveInteraction.LENGTH) {
 			Experiment e =
-				new Experiment(interactions.substring(i, interactions.length()), pis);
+				new Experiment(
+					interactions.substring(i, interactions.length()), pis);
 
-			System.out.println("learn" + e);
 			updateExperiment(e);
 		}
 	}
@@ -128,42 +138,41 @@ public class Experience {
 			if (e.getProclivity() > maxProclivity) {
 				bestExperiences.clear();
 				maxProclivity = e.getProclivity();
-			};
+			}
+
 			if (maxProclivity == e.getProclivity()) {
 				bestExperiences.add(new Experiment(e));
 			}
 		}
 
-		if (bestExperiences.size() == 0) {
-			
-			return new Experiment(pis.getRandom());
+		if (bestExperiences.size() > 0) {
+			Experiment e = Utils.getRandomElement(bestExperiences);
+
+			//Do not let experiments escape
+			return new Experiment(e);
 		}
 
-		Experiment e = Utils.getRandomElement(bestExperiences);
-
-		//Do not let experiments escape
-		return new Experiment(e);
-
+		return null;
 	}
 
 	private void updateExperiment(Experiment e) {
-		if (e.experiment.size() > MAX_EXPERIMENT_SIZE) {
+		if (e == null || e.isPrimitiveInteraction() ||
+			e.experiment.size() > MAX_EXPERIMENT_SIZE) {
+
 			return;
 		}
 
 		Experiment experiment = experiments.get(e.key);
 
 		if (experiment == null) {
-			if ((/* e.getValence() >= 0 && */ !e.isPrimitiveInteraction())) {
-				experiments.put(e.key, e);
+			experiments.put(e.key, e);
 
-				//remember for the maximum length of experiment
-				if (maxExperimentLength < e.experiment.size()) {
-					maxExperimentLength = e.experiment.size();
-				}
+			//remember for the maximum length of experiment
+			if (maxExperimentLength < e.experiment.size()) {
+				maxExperimentLength = e.experiment.size();
 			}
 		}
-		else if (!e.isPrimitiveInteraction()) {
+		else {
 			experiment.updateTried();
 			experiment.updateSuccess(e.isSuccess());
 		}
@@ -198,8 +207,9 @@ public class Experience {
 	public String toString() {
 		String s = "Experience: maxLen:" + maxExperimentLength + "\n";
 		s += "interactions:" + interactions + "\n";
+		int i = 0;
 		for (String key: experiments.keySet()) {
-			s += (key + ":" + experiments.get(key)) + "\n";
+			s += (++i) + ". " + (experiments.get(key)) + "\n";
 		}
 
 		return s;

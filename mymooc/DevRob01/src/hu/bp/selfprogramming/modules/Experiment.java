@@ -125,7 +125,7 @@ public class Experiment {
 	}
 
 	public String toString() {
-		return "[" + key + "(" + valence + "," + proclivity + ")]";
+		return "[" + key + "(" + valence + "," + proclivity + "," + match + ")]";
 	}
 
 	@Override

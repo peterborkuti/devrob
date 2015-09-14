@@ -37,7 +37,7 @@ public class ExperienceTest {
 	}
 
 	@Test
-	public void testLearn() {
+	public void testLearnWithoutPis() {
 		Experience e = new Experience();
 
 		assertEquals(0, e.getExperiments().size());
@@ -48,8 +48,24 @@ public class ExperienceTest {
 
 		assertEquals(0, e.getExperiments().size());
 		assertEquals(PrimitiveInteraction.LENGTH, e.getInteractions().length());
+	}
 
-		enacted = new Experiment(p12);
+	@Test
+	public void testLearnWithPis() {
+		Experience e = new Experience();
+
+		Experiment enacted = new Experiment(p11);
+		e.learn(enacted, pis);
+		assertEquals(0, e.getExperiments().size());
+		assertEquals(PrimitiveInteraction.LENGTH, e.getInteractions().length());
+		assertEquals(p11.interaction, e.getInteractions());
+
+		e.learn(enacted, pis);
+		assertEquals(1, e.getExperiments().size());
+		assertTrue(
+			e.getExperiments().containsValue(
+				new Experiment(p11.interaction + p11.interaction, pis)));
+		assertEquals(p11.interaction + p11.interaction, e.getInteractions());
 
 		List<Experiment> t1 = new ArrayList<Experiment>();
 		Experiment newE = new Experiment(p11, p11);
@@ -65,22 +81,30 @@ public class ExperienceTest {
 
 	@Test
 	public void testGetBestExperiment() {
-		fail("Not yet implemented");
+		Experiment e = new Experiment("e1r1e2r2", pis);
+		assertNull(e.getLast(pis));
 	}
 
 	@Test
 	public void testGetLast() {
 		Experience e = new Experience();
 		assertNull(e.getLast(pis));
+		assertEquals(0, e.getInteractions().length());
 
 		Experiment t1 = new Experiment(p11);
 		e.learn(t1, null);
 		assertEquals(e.getLast(pis), p11);
-
+		assertEquals(PrimitiveInteraction.LENGTH, e.getInteractions().length());
 
 		Experiment t2 = new Experiment(p12);
 		e.learn(t2, null);
 		assertEquals(e.getLast(pis), p12);
+		assertEquals(2 * PrimitiveInteraction.LENGTH, e.getInteractions().length());
+
+		Experiment t3 = new Experiment(p21);
+		e.learn(t3, null);
+		assertEquals(e.getLast(pis), p21);
+		assertEquals(3 * PrimitiveInteraction.LENGTH, e.getInteractions().length());
 
 	}
 

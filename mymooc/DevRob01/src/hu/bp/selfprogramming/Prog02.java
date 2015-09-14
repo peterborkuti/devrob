@@ -49,21 +49,28 @@ public class Prog02 extends AbstractProgram {
 		List<Experiment> newExperiences = new ArrayList<Experiment>();
 
 		Experiment enactedExperiment;
-		Experiment experiment;
+		Experiment experiment = experience.getBestExperiment(pis);
 
-		if (step == 0) {
+		if (experiment == null) {
 			experiment = new Experiment(pis.getRandom());
-
-			enactedExperiment =
-				new Experiment(ExperimentUtils.enactPrimitiveInteraction(
-					world, experiment.experiment.get(0), pis, newExperiences));
+			System.out.println("Selected primitive random experiment:" + experiment);
 		}
 		else {
-			experiment = experience.getBestExperiment(pis);
-	
+			System.out.println("Selected best experiment:" + experiment);
+		}
+
+		if (step == 0) {
+			enactedExperiment =
+				new Experiment(
+					ExperimentUtils.enactPrimitiveInteraction(
+						world, experiment.experiment.get(0), pis,
+						newExperiences));
+		}
+		else {
 			enactedExperiment =
 				ExperimentUtils.enact(
-					experience.getLast(pis), experiment, world, pis, newExperiences);
+					experience.getLast(pis), experiment, world, pis,
+					newExperiences);
 		}
 
 		experience.learn(enactedExperiment, pis);
