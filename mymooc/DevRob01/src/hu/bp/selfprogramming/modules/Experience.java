@@ -20,7 +20,11 @@ import com.google.common.collect.ImmutableMap;
  *
  */
 public class Experience {
-	private static final int MAX_EXPERIMENT_SIZE = 7;
+	/**
+	 * There will be no experiment stored which longer than this number
+	 * It is for avoiding memory and/or performance issues
+	 */
+	public static final int MAX_EXPERIMENT_SIZE = 7;
 
 	/**
 	 * Memory of the robot about past experiments
@@ -44,8 +48,12 @@ public class Experience {
 
 	public Experience() { }
 
-	public Experience(Map<String, Experiment> e, String pastInteractions) {
-		experiments.putAll(e);
+	public Experience(List<PrimitiveInteraction> newInteractions,
+			String pastInteractions) {
+
+		Experiment newExperiment = new Experiment(newInteractions);
+		experiments.put(newExperiment.key, newExperiment);
+
 		interactions.append(pastInteractions);
 	}
 
@@ -53,12 +61,8 @@ public class Experience {
 		this(e, "");
 	}
 
-	public Experience(List<PrimitiveInteraction> newInteractions,
-			String pastInteractions) {
-
-		Experiment newExperiment = new Experiment(newInteractions);
-		experiments.put(newExperiment.key, newExperiment);
-
+	public Experience(Map<String, Experiment> e, String pastInteractions) {
+		experiments.putAll(e);
 		interactions.append(pastInteractions);
 	}
 
@@ -88,18 +92,102 @@ public class Experience {
 	}
 	*/
 
+	public Experiment getBestExperiment(PrimitiveInteractions pis) {
+		List<Experiment> found =
+			ExperimentUtils.match(getInteractions(), experiments);
+
+		long maxValence = Integer.MIN_VALUE;
+		List<Experiment> bestExperiences = new ArrayList<Experiment>();
+
+		for (Experiment e: found) {
+			if (e.getValence() > maxValence) {
+				bestExperiences.clear();
+				maxValence = e.getValence();
+			}
+
+			if (maxValence == e.getValence()) {
+				bestExperiences.add(new Experiment(e));
+			}
+		}
+
+		if (bestExperiences.size() > 0) {
+			Experiment e = Utils.getRandomElement(bestExperiences);
+
+			//Do not let experiments escape
+			return new Experiment(e);
+		}
+
+		return null;
+	}
+
+	public ImmutableMap<String, Experiment> getExperiments() {
+		return 
+			new ImmutableMap.Builder<String, Experiment>()
+				.putAll(experiments).build();
+	}
+
+	public String getInteractions() {
+		return interactions.toString();
+	}
+
+	/**
+	 * Gets the last enacted primitive interaction
+	 * 
+	 * @param pis
+	 * @return null if there was not interaction stored
+	 */
+	public PrimitiveInteraction getLast(PrimitiveInteractions pis) {
+		if (interactions.length() < PrimitiveInteraction.LENGTH) {
+			return null;
+		}
+
+		return pis.get(
+			interactions.substring(
+				interactions.length() - PrimitiveInteraction.LENGTH));
+	}
+
+	public String getLastInteractions() {
+		return
+			interactions.substring(
+				Math.max(
+					0,
+					interactions.length() -
+						MAX_EXPERIMENT_SIZE * PrimitiveInteraction.LENGTH));
+	}
+
 	/**
 	 * Robot stores newExperiments in its memory
 	 * @param enactedExperiment 
 	 * 
 	 * @param newExperiments
 	 */
-	public void learn(Experiment enactedExperiment, PrimitiveInteractions pis) {
-		if (enactedExperiment == null) {
+	public void learn(Experiment intended, Experiment enacted, PrimitiveInteractions pis) {
+		if (enacted == null) {
 			return;
 		}
 
-		interactions.append(enactedExperiment.key);
+		if (pis == null) {
+			return;
+		}
+
+		if (intended == null) {
+			return;
+		}
+
+		for (PrimitiveInteraction pi : enacted.getAfterMatchedList()) {
+			learn(pi, pis);
+		}
+
+		//TODO: weaken failed experiments
+
+	}
+
+	public void learn(PrimitiveInteraction enacted, PrimitiveInteractions pis) {
+		if (enacted == null) {
+			return;
+		}
+
+		interactions.append(enacted.interaction);
 
 		if (interactions.length() < PrimitiveInteraction.LENGTH * 2) {
 			return;
@@ -108,8 +196,6 @@ public class Experience {
 		if (pis == null) {
 			return;
 		}
-
-		System.out.println("Learn:" + enactedExperiment);
 
 		int startPos = interactions.length() - 2 * PrimitiveInteraction.LENGTH;
 		int endPos =
@@ -123,36 +209,19 @@ public class Experience {
 				new Experiment(
 					interactions.substring(i, interactions.length()), pis);
 
-			updateExperiment(e);
+				updateExperiment(e);
 		}
 	}
 
-	public Experiment getBestExperiment(PrimitiveInteractions pis) {
-		List<Experiment> found =
-			ExperimentUtils.match(getInteractions(), experiments);
-
-		long maxProclivity = Integer.MIN_VALUE;
-		List<Experiment> bestExperiences = new ArrayList<Experiment>();
-
-		for (Experiment e: found) {
-			if (e.getProclivity() > maxProclivity) {
-				bestExperiences.clear();
-				maxProclivity = e.getProclivity();
-			}
-
-			if (maxProclivity == e.getProclivity()) {
-				bestExperiences.add(new Experiment(e));
-			}
+	public String toString() {
+		String s = "Experience: maxLen:" + maxExperimentLength + "\n";
+		s += "interactions:" + getLastInteractions() + "\n";
+		int i = 0;
+		for (String key: experiments.keySet()) {
+			s += (++i) + ". " + (experiments.get(key)) + "\n";
 		}
 
-		if (bestExperiences.size() > 0) {
-			Experiment e = Utils.getRandomElement(bestExperiences);
-
-			//Do not let experiments escape
-			return new Experiment(e);
-		}
-
-		return null;
+		return s;
 	}
 
 	private void updateExperiment(Experiment e) {
@@ -176,43 +245,6 @@ public class Experience {
 			experiment.updateTried();
 			experiment.updateSuccess(e.isSuccess());
 		}
-	}
-
-	/**
-	 * Gets the last enacted primitive interaction
-	 * 
-	 * @param pis
-	 * @return null if there was not interaction stored
-	 */
-	public PrimitiveInteraction getLast(PrimitiveInteractions pis) {
-		if (interactions.length() < PrimitiveInteraction.LENGTH) {
-			return null;
-		}
-
-		return pis.get(
-			interactions.substring(
-				interactions.length() - PrimitiveInteraction.LENGTH));
-	}
-
-	public String getInteractions() {
-		return interactions.toString();
-	}
-
-	public ImmutableMap<String, Experiment> getExperiments() {
-		return 
-			new ImmutableMap.Builder<String, Experiment>()
-				.putAll(experiments).build();
-	}
-
-	public String toString() {
-		String s = "Experience: maxLen:" + maxExperimentLength + "\n";
-		s += "interactions:" + interactions + "\n";
-		int i = 0;
-		for (String key: experiments.keySet()) {
-			s += (++i) + ". " + (experiments.get(key)) + "\n";
-		}
-
-		return s;
 	}
 
 }

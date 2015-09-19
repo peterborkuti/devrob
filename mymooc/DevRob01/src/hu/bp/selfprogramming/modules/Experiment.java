@@ -27,16 +27,6 @@ public class Experiment {
 		return valence;
 	}
 
-	public void setValence(int startIndex) {
-		int v = 0;
-		for (int i = startIndex; i < experiment.size(); i++) {
-			v += experiment.get(i).valence;
-		}
-
-		this.valence = v;
-		this.proclivity = v * startIndex * success;
-	}
-
 	/**
 	 * The concatenated list of interactions
 	 * like "e1r2e1r1e2r1..."
@@ -48,12 +38,19 @@ public class Experiment {
 
 	private int success = 0;
 
-	private int tried = 0;
+	
+	/**
+	 * It is used in proclivity's expression as a divisor
+	 * so do not set it to 0!
+	 */
+	private int tried = 1;
 
 	/**
 	 * How much fits this experiment into the immediate past
 	 * How many primitive interactions fits to each other from the
 	 * past enacted interactions and from the left of this experiment
+	 * 
+	 * From this value as an index predicts this experiment
 	 */
 	private int match = 0;
 
@@ -66,10 +63,32 @@ public class Experiment {
 	}
 
 	public Experiment(Experiment e) {
-		this(e.experiment);
+		this(e.experiment, e.match);
+	}
+
+	/**
+	 * Checks if experiment is worth to store
+	 * (It's proposed experiment's value can be positive)
+	 * @param e
+	 * @return
+	 */
+	public static boolean isValuableExperiment(Experiment e) {
+		int match = e.experiment.size() / 2;
+
+		if (match < 1) {
+			return false;
+		}
+
+		Experiment test = new Experiment(e.experiment, match);
+
+		return test.valence >= 0;
 	}
 
 	public Experiment(List<PrimitiveInteraction> experiment) {
+		this(experiment, 0);
+	}
+
+	public Experiment(List<PrimitiveInteraction> experiment, int match) {
 		super();
 		this.experiment =
 			new ImmutableList.Builder<PrimitiveInteraction>()
@@ -78,14 +97,12 @@ public class Experiment {
 		StringBuilder key =
 			new StringBuilder(this.experiment.size() * PrimitiveInteraction.LENGTH);
 
-		int valence = 0;
-		for (PrimitiveInteraction i : experiment) {
-			valence += i.valence;
-			key.append(i.interaction);
+		for (int i = 0; i < experiment.size(); i++) {
+			key.append(experiment.get(i).interaction);
 		}
 
-		this.valence = valence;
 		this.key = key.toString();
+		setMatch(match);
 	}
 
 	public Experiment(String interactions, PrimitiveInteractions pis) {
@@ -124,8 +141,32 @@ public class Experiment {
 		return success >= 0;
 	}
 
+	public ImmutableList<PrimitiveInteraction> getMatchedList() {
+		return experiment.subList(0, match);
+	}
+
+	public String getAfterMatchedString() {
+		return key.substring(match * PrimitiveInteraction.LENGTH);
+	}
+
+	public ImmutableList<PrimitiveInteraction> getAfterMatchedList() {
+		return experiment.subList(match, experiment.size());
+	}
+
+	public String getKey() {
+		String k = key;
+
+		if (match > 0) {
+			int index = match * PrimitiveInteraction.LENGTH;
+			k = (key.substring(0, index) + "|" + key.substring(index)).toUpperCase();
+		}
+
+		return k;
+	}
+
+	@Override
 	public String toString() {
-		return "[" + key + "(" + valence + "," + proclivity + "," + match + ")]";
+		return "[" + getKey() + "(" + valence + "," + proclivity + "," + match + ")]";
 	}
 
 	@Override
@@ -155,13 +196,36 @@ public class Experiment {
 		return true;
 	}
 
+	/**
+	 * From this value as an index predicts this experiment
+	 * If it is 0, it was not matched yet
+	 * @return index of the first future primitive interaction in this
+	 * experiment
+	 */
 	public int getMatch() {
 		return match;
 	}
 
+	/**
+	 * Sets the match index of this experiment.
+	 * 
+	 * It also re-counts valence and proclivity
+	 * @param match
+	 */
 	public void setMatch(int match) {
 		this.match = match;
+		countValence();
+		this.proclivity = valence * match * success / tried;
 	}
 
+	public void countValence() {
+		int valence = 0;
+
+		for (int i = match; i < experiment.size(); i++) {
+			valence += experiment.get(i).valence;
+		}
+
+		this.valence = valence;
+	}
 
 }

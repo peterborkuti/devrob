@@ -1,5 +1,6 @@
 package hu.bp.selfprogramming.modules;
 
+import hu.bp.common.ExperimentException;
 import hu.bp.common.Utils;
 import hu.bp.common.World;
 
@@ -23,99 +24,49 @@ public class ExperimentUtils {
 	 * @param w
 	 * @return
 	 */
-	public static Experiment enact(final PrimitiveInteraction lastEnaction,
+	public static Experiment enact(
 			final Experiment experiment,
-			final World w, final PrimitiveInteractions pis,
-			final List<Experiment> newExperiments) {
+			final World w, final PrimitiveInteractions pis) {
 
 		List<PrimitiveInteraction> enactedExperimentList =
 			new ArrayList<PrimitiveInteraction>();
 
-		if (lastEnaction != null) {
-			enactedExperimentList.add(lastEnaction);
+		if (experiment.getMatch() <= 0) {
+			throw new ExperimentException(
+				"Can not enact experiment with zero match. " +
+				"Use enact(PrimitiveInteraction,..).");
 		}
 
-		PrimitiveInteraction prevEnaction = lastEnaction;
+		/* the experiment's first some experiment is has been enacted lastly
+		 * see experiment.match field
+		 */
+		enactedExperimentList.addAll(experiment.getMatchedList());
 
-		boolean failed = false;
-
-		for (int i = experiment.getMatch();
-			!failed && i < experiment.experiment.size(); i++) {
+		for (int i = experiment.getMatch(); i < experiment.experiment.size(); i++) {
 
 			PrimitiveInteraction intended = experiment.experiment.get(i);
 
-			failed =
-				enactPrimitiveInteraction(
-					w, intended, pis, enactedExperimentList,
-					newExperiments);
+			PrimitiveInteraction enacted = enact(intended, w, pis);
 
-			if (failed && prevEnaction != null) {
-					Experiment failedExperiment =
-						new Experiment(prevEnaction, intended);
+			enactedExperimentList.add(enacted);
 
-					newExperiments.addAll(
-						getFailedSubExperiments(
-							experiment.experiment.subList(0, i + 1), failedExperiment));
+			if (!intended.equals(enacted)) {
+				break;
 			}
-
-			newExperiments.addAll(
-				getSubExperiments(enactedExperimentList, null, true));
-
-			prevEnaction = intended;
 		}
 
 		//Just to be sure not escape Anything
 		return new Experiment(enactedExperimentList);
 	}
 
-	/**
-	 * Enacts a primitive interaction (intended).
-	 * @param w
-	 * @param intended the interaction to enact
-	 * @param pis default primitive interactions
-	 * @param enactedExperimentList
-	 * @param newExperiments
-	 * @return with true, if enacted interaction is the same as the intended
-	 */
-	public static boolean enactPrimitiveInteraction(final World w,
-			final PrimitiveInteraction intended,
-			final PrimitiveInteractions pis,
-			final List<PrimitiveInteraction> enactedExperimentList,
-			final List<Experiment> newExperiments) {
-
-		PrimitiveInteraction enacted =
-			enactPrimitiveInteraction(w, intended, pis, newExperiments);
-
-		enactedExperimentList.add(enacted);
-
-		return !intended.equals(enacted);
-	}
-
-	/**
-	 * Enacts a primitive interaction (intended).
-	 * @param w
-	 * @param intended the interaction to enact
-	 * @param pis default primitive interactions
-	 * @param newExperiments
-	 * @return the enacted interaction
-	 */
-	public static PrimitiveInteraction enactPrimitiveInteraction(final World w,
-			final PrimitiveInteraction intended,
-			final PrimitiveInteractions pis,
-			final List<Experiment> newExperiments) {
+	public static PrimitiveInteraction enact(final PrimitiveInteraction intended,
+		final World w, final PrimitiveInteractions pis) {
 
 		String result = w.getResult(intended.experiment);
 
-		PrimitiveInteraction enacted = pis.get(intended.experiment, result);
-
-		newExperiments.add(new Experiment(enacted, true));
-
-		if (!intended.equals(enacted)) {
-			newExperiments.add(new Experiment(intended, false));
-		}
-
-		return enacted;
+		return pis.get(intended.experiment, result);
 	}
+
 
 	public static List<Experiment> getSubExperiments(
 			List<PrimitiveInteraction> list, String filter, boolean success) {
@@ -160,7 +111,10 @@ public class ExperimentUtils {
 	 * interactions. The better the fit, the better the anticipation is
 	 * 
 	 * The returned experiments will be set its match field with the number of
-	 * fitted primitive interactions 
+	 * fitted primitive interactions
+	 * 
+	 * The proposed primitive interactions star from the experiment's match value
+	 * as an index
 	 * 
 	 * Usage: 
 	 * @param key the enacted primitive interactions

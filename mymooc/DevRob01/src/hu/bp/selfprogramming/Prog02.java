@@ -46,36 +46,42 @@ public class Prog02 extends AbstractProgram {
 
 	@Override
 	protected void doOneStep(int step) {
-		List<Experiment> newExperiences = new ArrayList<Experiment>();
+		System.out.println("last interactions:" + experience.getLastInteractions());
 
-		Experiment enactedExperiment;
-		Experiment experiment = experience.getBestExperiment(pis);
+		Experiment intendedExp = experience.getBestExperiment(pis);
 
-		if (experiment == null) {
-			experiment = new Experiment(pis.getRandom());
-			System.out.println("Selected primitive random experiment:" + experiment);
+		int valence = 0;
+
+		if (intendedExp == null || intendedExp.getValence() < 0) {
+			PrimitiveInteraction intended = pis.getRandom();
+
+			PrimitiveInteraction enacted = 
+				ExperimentUtils.enact(intended, world, pis);
+
+			valence = enacted.valence;
+
+			experience.learn(enacted, pis);
+			System.out.println(
+				intended.interaction + "=>" + enacted.interaction + ":" +
+				valence);
 		}
 		else {
-			System.out.println("Selected best experiment:" + experiment);
+			Experiment enacted =
+				ExperimentUtils.enact(intendedExp, world, pis);
+
+			// learn and getValence use match!
+			enacted.setMatch(intendedExp.getMatch());
+
+			valence = enacted.getValence();
+
+			experience.learn(intendedExp, enacted, pis);
+
+			System.out.println(
+				intendedExp.getKey() + "=>" + enacted + ":" + valence);
+
 		}
 
-		if (step == 0) {
-			enactedExperiment =
-				new Experiment(
-					ExperimentUtils.enactPrimitiveInteraction(
-						world, experiment.experiment.get(0), pis,
-						newExperiences));
-		}
-		else {
-			enactedExperiment =
-				ExperimentUtils.enact(
-					experience.getLast(pis), experiment, world, pis,
-					newExperiences);
-		}
-
-		experience.learn(enactedExperiment, pis);
-
-		if (enactedExperiment.getValence() >= 0) {
+		if (valence >= 0) {
 			if (mood != PLEASED) counter = 0;
 			mood = PLEASED;
 			counterPleased++;
@@ -90,14 +96,10 @@ public class Prog02 extends AbstractProgram {
 
 		// learnCompositeInteraction(contextInteraction, enactedInteraction);
 
-		String it = enactedExperiment.key;
-		if (!enactedExperiment.equals(experiment)) {
-			it = experiment + "=>" + it;
-		}
-		System.out.println(
+		System.out.println("\n" + 
 			(step + "   ").substring(0, 4) + ":" +
 			"(Pleased:" + counterPleased + "/Pained:" + counterPained + ")" +
-			(mood +"   ").substring(0, 8) + it);
+			(mood +"   ").substring(0, 8));
 		System.out.println(experience);
 	}
 
