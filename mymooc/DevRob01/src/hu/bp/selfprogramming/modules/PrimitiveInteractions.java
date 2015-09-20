@@ -14,6 +14,7 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 /**
  * Stores all the possible Primitive Interactions ([experiment, result] touples)
@@ -110,12 +111,26 @@ public class PrimitiveInteractions {
 	/**
 	 * Returns with a random primitive interaction
 	 * 
+	 * If parameter is not null, returns with another random
+	 * interaction than the experiment's first not matched
+	 * interaction
+	 * 
 	 * @return
 	 */
-	public PrimitiveInteraction getRandom() {
+	public PrimitiveInteraction getRandom(Experiment e) {
 		ImmutableCollection<PrimitiveInteraction> keys = interactions.values();
 
-		PrimitiveInteraction i = Utils.getRandomElement(keys.asList());
+		List<PrimitiveInteraction> mKeys = Lists.newArrayList();
+		mKeys.addAll(keys);
+
+		if (e != null) {
+			//the key of the first not matched prim. int.
+			String notMatchedKey = e.getAfterMatchedString();
+			String firstNotMatchedKey = notMatchedKey.substring(0, PrimitiveInteraction.LENGTH);
+			mKeys.remove(get(firstNotMatchedKey));
+		}
+
+		PrimitiveInteraction i = Utils.getRandomElement(mKeys);
 
 		//Don't let elements escape
 		return new PrimitiveInteraction(i.experiment, i.result, i.valence);

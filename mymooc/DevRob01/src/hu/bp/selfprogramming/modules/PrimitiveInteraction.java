@@ -82,4 +82,11 @@ public class PrimitiveInteraction {
 		return this.hashValue == other.hashValue;
 	}
 
+	@Override
+	public String toString() {
+		return "PrimitiveInteraction [valence=" + valence + ", interaction="
+				+ interaction + "]";
+	}
+
+
 }

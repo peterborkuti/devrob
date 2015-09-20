@@ -1,7 +1,6 @@
 package hu.bp.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +25,19 @@ public class UtilsTest {
 	}
 
 	@Test
+	public void testIsFitted() {
+		assertFalse(Utils.isFitted(null, null, 0));
+		assertFalse(Utils.isFitted(null, null, 1));
+		assertFalse(Utils.isFitted(null, null, -1));
+		assertFalse(Utils.isFitted("", "", 1));
+		assertTrue(Utils.isFitted("abc", "abc", 5));
+
+		assertTrue(Utils.isFitted("a", "a", 1));
+		assertTrue(Utils.isFitted("abcxy", "xyqw", 2));
+		assertFalse(Utils.isFitted("abcxy", "abcxy", 2));
+	}
+
+	@Test
 	public void testBestFitSize() {
 		assertEquals(-1, Utils.bestFitSize("", ""));
 		assertEquals(-1, Utils.bestFitSize("xxx", ""));
@@ -34,6 +46,11 @@ public class UtilsTest {
 		assertEquals(2, Utils.bestFitSize("abcdxy", "xygh"));
 		assertEquals(1, Utils.bestFitSize("xxx", "xyy"));
 		assertEquals(0, Utils.bestFitSize("abc", "def"));
+
+		assertEquals(3, Utils.bestFitSize("abc", "abcdef"));
+
+		assertEquals(8, Utils.bestFitSize("e1r1e2r2e1r2", "e2r2e1r2"));
+		assertEquals(8, Utils.bestFitSize("e1r1e2r2e1r2", "e2r2e1r2e1r1"));
 	}
 
 	@Test

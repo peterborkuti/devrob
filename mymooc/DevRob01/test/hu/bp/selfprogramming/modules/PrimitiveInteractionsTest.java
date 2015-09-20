@@ -81,10 +81,34 @@ public class PrimitiveInteractionsTest {
 
 	@Test
 	public void testGetRandom() {
-		PrimitiveInteraction p = pis.getRandom();
+		PrimitiveInteraction p = pis.getRandom(null);
 
 		assertNotNull(p);
-		assertTrue(pis.interactions.containsValue(pis.getRandom()));
+		assertTrue(pis.interactions.containsValue(pis.getRandom(null)));
+
+		List<PrimitiveInteraction> l = new ArrayList<PrimitiveInteraction>();
+		l.add(p11);
+		l.add(p12);
+
+		PrimitiveInteractions mpis = new PrimitiveInteractions(l);
+
+		Experiment e = new Experiment("e1r1e1r2", mpis);
+		e.setMatch(1);
+		assertEquals("E1R1|E1R2", e.getKey());
+		assertEquals("e1r2", e.getAfterMatchedString());
+		assertEquals(p11.interaction, mpis.getRandom(e).interaction);
+
+		e = new Experiment("e1r2e1r1", mpis);
+		e.setMatch(1);
+		assertEquals("E1R2|E1R1", e.getKey());
+		assertEquals("e1r1", e.getAfterMatchedString());
+		assertEquals(p12.interaction, mpis.getRandom(e).interaction);
+
+		e = new Experiment("e1r1e1r1", mpis);
+		e.setMatch(1);
+		assertEquals("E1R1|E1R1", e.getKey());
+		assertEquals("e1r1", e.getAfterMatchedString());
+		assertEquals(p12.interaction, mpis.getRandom(e).interaction);
 	}
 
 }

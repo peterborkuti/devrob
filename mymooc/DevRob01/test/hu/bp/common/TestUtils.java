@@ -1,7 +1,11 @@
 package hu.bp.common;
 
+import hu.bp.selfprogramming.modules.Experiment;
 import hu.bp.selfprogramming.modules.PrimitiveInteraction;
 import hu.bp.selfprogramming.modules.PrimitiveInteractions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestUtils {
 	public static String e1 = "e1";
@@ -18,6 +22,18 @@ public class TestUtils {
 	public static PrimitiveInteraction p21 = new PrimitiveInteraction(pos[1], 1);
 	public static PrimitiveInteraction p12 = new PrimitiveInteraction(neg[0], -1);
 	public static PrimitiveInteraction p22 = new PrimitiveInteraction(neg[1], -1);
+
+	public static Map<String, Experiment> cExpList(String s) {
+		String[] strExps = s.split(",");
+
+		Map<String, Experiment> m = new HashMap<String, Experiment>();
+
+		for (String exp: strExps) {
+			m.put(exp, new Experiment(exp, pis));
+		}
+
+		return m;
+	}
 
 
 }

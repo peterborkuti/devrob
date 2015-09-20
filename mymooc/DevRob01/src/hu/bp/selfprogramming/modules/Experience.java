@@ -6,9 +6,12 @@ package hu.bp.selfprogramming.modules;
 import hu.bp.common.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -24,7 +27,7 @@ public class Experience {
 	 * There will be no experiment stored which longer than this number
 	 * It is for avoiding memory and/or performance issues
 	 */
-	public static final int MAX_EXPERIMENT_SIZE = 7;
+	public static final int MAX_EXPERIMENT_SIZE = 4;
 
 	/**
 	 * Memory of the robot about past experiments
@@ -92,25 +95,32 @@ public class Experience {
 	}
 	*/
 
+	private double getMax(Experiment e) {
+		return e.getProclivity();
+	}
+
 	public Experiment getBestExperiment(PrimitiveInteractions pis) {
 		List<Experiment> found =
 			ExperimentUtils.match(getInteractions(), experiments);
 
-		long maxValence = Integer.MIN_VALUE;
+		System.out.println("Matched experiments:" + found);
+
+		double max = Integer.MIN_VALUE;
 		List<Experiment> bestExperiences = new ArrayList<Experiment>();
 
 		for (Experiment e: found) {
-			if (e.getValence() > maxValence) {
+			if (getMax(e) > max) {
 				bestExperiences.clear();
-				maxValence = e.getValence();
+				max = getMax(e);
 			}
 
-			if (maxValence == e.getValence()) {
+			if (Math.abs(max - getMax(e)) < 0.1) {
 				bestExperiences.add(new Experiment(e));
 			}
 		}
 
 		if (bestExperiences.size() > 0) {
+			System.out.println("Best found:" + bestExperiences);
 			Experiment e = Utils.getRandomElement(bestExperiences);
 
 			//Do not let experiments escape
@@ -178,8 +188,36 @@ public class Experience {
 			learn(pi, pis);
 		}
 
-		//TODO: weaken failed experiments
+		if (!enacted.equals(intended)) {
+			// the last interaction of enacted is different from intended, so
+			// the failed experiments are the ones, which contains the
+			// intended.subList(0, enacted.size())
+			weaken(intended.key.substring(0, enacted.key.length()));
+		}
 
+	}
+
+	public void clean() {
+		List<String> keys = new ArrayList<String>();
+		keys.addAll(experiments.keySet());
+		for (String key: keys) {
+			Experiment e = experiments.get(key);
+			if (e.getTried() > 4 && e.getSuccess() < e.getTried() / 2) {
+				experiments.remove(key);
+				System.out.println("DEL:" + e);
+			}
+		}
+	}
+
+	private void weaken(String keyPart) {
+		for (String key: experiments.keySet()) {
+			if (key.contains(keyPart)) {
+				Experiment e = experiments.get(key);
+				System.out.print("WEA:" + e + "=>");
+				e.updateTried(false);
+				System.out.println(e);
+			}
+		}
 	}
 
 	public void learn(PrimitiveInteraction enacted, PrimitiveInteractions pis) {
@@ -209,24 +247,33 @@ public class Experience {
 				new Experiment(
 					interactions.substring(i, interactions.length()), pis);
 
-				updateExperiment(e);
+				insertOrUpdateExperiment(e, true);
 		}
+	}
+
+	public void printChangedExperiments() {
+		int i = 0;
+		for (String key: experiments.keySet()) {
+			Experiment e = experiments.get(key);
+			String c = e.isChanged() ? "*" : " ";
+			System.out.println((++i) + ". " + c + (experiments.get(key)));
+			e.clearChanged();
+		}
+
 	}
 
 	public String toString() {
 		String s = "Experience: maxLen:" + maxExperimentLength + "\n";
 		s += "interactions:" + getLastInteractions() + "\n";
-		int i = 0;
-		for (String key: experiments.keySet()) {
-			s += (++i) + ". " + (experiments.get(key)) + "\n";
-		}
 
 		return s;
 	}
 
-	private void updateExperiment(Experiment e) {
+	private void insertOrUpdateExperiment(Experiment e, boolean success) {
 		if (e == null || e.isPrimitiveInteraction() ||
-			e.experiment.size() > MAX_EXPERIMENT_SIZE) {
+			//!Experiment.isValuableExperiment(e) ||
+			e.experiment.size() > MAX_EXPERIMENT_SIZE ||
+			e.experiment.size() < MAX_EXPERIMENT_SIZE) {
 
 			return;
 		}
@@ -235,15 +282,16 @@ public class Experience {
 
 		if (experiment == null) {
 			experiments.put(e.key, e);
-
+			System.out.println("ADD:" + experiments.get(e.key));
 			//remember for the maximum length of experiment
 			if (maxExperimentLength < e.experiment.size()) {
 				maxExperimentLength = e.experiment.size();
 			}
 		}
 		else {
-			experiment.updateTried();
-			experiment.updateSuccess(e.isSuccess());
+			System.out.print("UPD:" + experiment + "=>");
+			experiment.updateTried(success);
+			System.out.println(experiment);
 		}
 	}
 

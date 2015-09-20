@@ -22,6 +22,27 @@ public class Utils {
 	}
 
 	/**
+	 * True if the key ends with the same string as the hole starts
+	 * 
+	 * @param key
+	 * @param hole
+	 * @param len how long the checked part is
+	 * @return
+	 */
+	public static boolean isFitted(String key, String hole, int len) {
+		if (key == null || hole == null || "".equals(key) || "".equals(hole) ||
+			len <= 0) {
+			return false;
+		}
+
+		len = Math.min(len, hole.length());
+
+		String suffix = hole.substring(0, len);
+
+		return key.endsWith(suffix);
+	}
+
+	/**
 	 * Gives the number of characters where key best fits to hole.
 	 * hole is checked from its left while key checked from its left
 	 * 
@@ -48,11 +69,9 @@ public class Utils {
 		int maxLen = Math.min(key.length(), hole.length());
 
 		int len = maxLen;
-		String suffix = hole.substring(0, len);
 
-		while ((len > 0) && !key.endsWith(suffix)) {
+		while ((len > 0) && !isFitted(key, hole, len)) {
 			len--;
-			suffix = hole.substring(0, len);
 		}
 
 		return (len);

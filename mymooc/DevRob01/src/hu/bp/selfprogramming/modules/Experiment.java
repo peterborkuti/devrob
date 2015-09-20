@@ -34,11 +34,32 @@ public class Experiment {
 	@Immutable
 	public final String key;
 
-	private long proclivity = 0;
+	private double proclivity = 0;
 
-	private int success = 0;
+	private int success = 1;
 
-	
+	private boolean changed = true;
+
+	public boolean isChanged() {
+		return changed;
+	}
+
+	private void setChanged(boolean changed) {
+		this.changed = changed;
+	}
+
+	public void clearChanged() {
+		setChanged(false);
+	}
+
+	public int getSuccess() {
+		return success;
+	}
+
+	public int getTried() {
+		return tried;
+	}
+
 	/**
 	 * It is used in proclivity's expression as a divisor
 	 * so do not set it to 0!
@@ -58,12 +79,14 @@ public class Experiment {
 		this(new ArrayList<PrimitiveInteraction>(Arrays.asList(i)));
 	}
 
+	/*
 	public Experiment(PrimitiveInteraction i, boolean success) {
 		this(new ArrayList<PrimitiveInteraction>(Arrays.asList(i)), success);
 	}
+	*/
 
 	public Experiment(Experiment e) {
-		this(e.experiment, e.match);
+		this(e.experiment, e.success, e.tried, e.match);
 	}
 
 	/**
@@ -109,36 +132,36 @@ public class Experiment {
 		this(pis.createList(interactions));
 	}
 
-	public Experiment(List<PrimitiveInteraction> experiment, boolean success) {
-		this(experiment);
-
-		this.success = (success) ? 1 : -1;
-		this.tried = 1;
-	}
-
 	public Experiment(PrimitiveInteraction i1,
 			PrimitiveInteraction i2) {
 		this(Arrays.asList(i1, i2));
+	}
+
+	public Experiment(ImmutableList<PrimitiveInteraction> experiment,
+			int success, int tried, int match) {
+		this(experiment);
+		this.success = success;
+		this.tried = tried;
+		this.match = match;
+		countValence();
+		countProclivity();
 	}
 
 	public boolean isPrimitiveInteraction() {
 		return experiment.size() == 1;
 	}
 
-	public void updateTried() {
+	public void updateTried(boolean success) {
 		tried++;
+		if (success) {
+			this.success++;
+		}
+		countProclivity();
+		setChanged(true);
 	}
 
-	public void updateSuccess(boolean successful) {
-		success += (successful) ? 1 : -1;
-	}
-
-	public long getProclivity() {
+	public double getProclivity() {
 		return proclivity;
-	}
-
-	public boolean isSuccess() {
-		return success >= 0;
 	}
 
 	public ImmutableList<PrimitiveInteraction> getMatchedList() {
@@ -153,6 +176,15 @@ public class Experiment {
 		return experiment.subList(match, experiment.size());
 	}
 
+	/**
+	 * Gives the key and match in a coded way:
+	 * if match > 0, the key will be upper cased and 
+	 * a "|" character where match points
+	 * 
+	 * This will show what is the matched part and what is
+	 * the predicted part
+	 * @return
+	 */
 	public String getKey() {
 		String k = key;
 
@@ -166,7 +198,8 @@ public class Experiment {
 
 	@Override
 	public String toString() {
-		return "[" + getKey() + "(" + valence + "," + proclivity + "," + match + ")]";
+		return "[" + getKey() + "(VPMST:" + valence + "," + proclivity + "," +
+				match + "," + success + "," + tried + ")]";
 	}
 
 	@Override
@@ -215,7 +248,8 @@ public class Experiment {
 	public void setMatch(int match) {
 		this.match = match;
 		countValence();
-		this.proclivity = valence * match * success / tried;
+		countProclivity();
+		setChanged(true);
 	}
 
 	public void countValence() {
@@ -226,6 +260,10 @@ public class Experiment {
 		}
 
 		this.valence = valence;
+	}
+
+	private void countProclivity() {
+		this.proclivity = valence * match * success / tried;
 	}
 
 }

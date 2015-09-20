@@ -4,9 +4,11 @@ import static hu.bp.common.Mood.BORED;
 import static hu.bp.common.Mood.PAINED;
 import static hu.bp.common.Mood.PLEASED;
 import hu.bp.common.AbstractProgram;
+import hu.bp.common.FourStepWorld;
 import hu.bp.common.Mood;
+import hu.bp.common.SimpleWorld;
 import hu.bp.common.ThreeStepWorld;
-import hu.bp.common.Utils;
+import hu.bp.common.TwoStepWorld;
 import hu.bp.common.World;
 import hu.bp.selfprogramming.modules.Experience;
 import hu.bp.selfprogramming.modules.Experiment;
@@ -15,8 +17,8 @@ import hu.bp.selfprogramming.modules.PrimitiveInteraction;
 import hu.bp.selfprogramming.modules.PrimitiveInteractions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class Prog02 extends AbstractProgram {
 	Mood mood;
@@ -27,6 +29,7 @@ public class Prog02 extends AbstractProgram {
 	private Experience experience;
 	private int counter;
 	private int counterPleased,counterPained;
+	private Scanner scanner =  new Scanner(System.in);
 
 	@Override
 	protected void init() {
@@ -46,40 +49,49 @@ public class Prog02 extends AbstractProgram {
 
 	@Override
 	protected void doOneStep(int step) {
+		System.out.println(experience);
 		System.out.println("last interactions:" + experience.getLastInteractions());
 
 		Experiment intendedExp = experience.getBestExperiment(pis);
 
+		if (intendedExp == null) {
+			System.out.println("intendedExp == null");
+		}
+		else {
+			System.out.println("intendedExp:" + intendedExp);
+		}
 		int valence = 0;
 
 		if (intendedExp == null || intendedExp.getValence() < 0) {
-			PrimitiveInteraction intended = pis.getRandom();
+			PrimitiveInteraction intended = pis.getRandom(intendedExp);
 
 			PrimitiveInteraction enacted = 
 				ExperimentUtils.enact(intended, world, pis);
 
 			valence = enacted.valence;
 
-			experience.learn(enacted, pis);
 			System.out.println(
 				intended.interaction + "=>" + enacted.interaction + ":" +
 				valence);
+
+			experience.learn(enacted, pis);
 		}
 		else {
 			Experiment enacted =
 				ExperimentUtils.enact(intendedExp, world, pis);
 
-			// learn and getValence use match!
+			//getValence use match!
 			enacted.setMatch(intendedExp.getMatch());
 
 			valence = enacted.getValence();
 
-			experience.learn(intendedExp, enacted, pis);
-
 			System.out.println(
-				intendedExp.getKey() + "=>" + enacted + ":" + valence);
+					intendedExp.getKey() + "=>" + enacted + ":" + valence);
 
+			experience.learn(intendedExp, enacted, pis);
 		}
+
+		experience.clean();
 
 		if (valence >= 0) {
 			if (mood != PLEASED) counter = 0;
@@ -96,11 +108,15 @@ public class Prog02 extends AbstractProgram {
 
 		// learnCompositeInteraction(contextInteraction, enactedInteraction);
 
+		experience.printChangedExperiments();
+
 		System.out.println("\n" + 
 			(step + "   ").substring(0, 4) + ":" +
 			"(Pleased:" + counterPleased + "/Pained:" + counterPained + ")" +
 			(mood +"   ").substring(0, 8));
-		System.out.println(experience);
+
+		scanner.nextLine();
 	}
+
 
 }

@@ -37,7 +37,7 @@ public class ExperimentUtils {
 				"Use enact(PrimitiveInteraction,..).");
 		}
 
-		/* the experiment's first some experiment is has been enacted lastly
+		/* the experiment's first some interactions have been enacted lastly
 		 * see experiment.match field
 		 */
 		enactedExperimentList.addAll(experiment.getMatchedList());
@@ -67,7 +67,7 @@ public class ExperimentUtils {
 		return pis.get(intended.experiment, result);
 	}
 
-
+	/*
 	public static List<Experiment> getSubExperiments(
 			List<PrimitiveInteraction> list, String filter, boolean success) {
 
@@ -83,7 +83,7 @@ public class ExperimentUtils {
 
 		return l;
 	}
-
+	*/
 	
 	/**
 	 * @param enactedExperiment
@@ -91,6 +91,7 @@ public class ExperimentUtils {
 	 * The first was OK, the last is failed
 	 * @return
 	 */
+	/*
 	public static Collection<? extends Experiment> getFailedSubExperiments(
 			List<PrimitiveInteraction> actedPartOfIintendedExperiment,
 			Experiment failedExperiment) {
@@ -100,7 +101,7 @@ public class ExperimentUtils {
 		return getSubExperiments(
 			actedPartOfIintendedExperiment, failedExperiment.key, false);
 	}
-
+	*/
 	/**
 	 * Find matching experiments for the given primitive interactions
 	 * 
@@ -125,6 +126,7 @@ public class ExperimentUtils {
 			Map<String, Experiment> experiments) {
 
 		List<Experiment> found = new ArrayList<Experiment>();
+		List<Experiment> notMatched  = new ArrayList<Experiment>();
 
 		if (key == null || "".equals(key) || experiments == null ||
 				experiments.size() == 0) {
@@ -135,19 +137,33 @@ public class ExperimentUtils {
 		String[] holes = experiments.keySet().toArray(new String[0]);
 
 		for (String hole: holes) {
-			int size =
-				Utils.bestFitSize(key, hole);
+			int size = Utils.bestFitSize(key, hole);
 
-			if ((size > 0) &&
-				// if there is no not-match part on the right side of the
-				// hole (fits all), it is not valuable to predict interactions
-				(size < hole.length())) {
-				Experiment e = new Experiment(experiments.get(hole));
-				e.setMatch(size / PrimitiveInteraction.LENGTH);
-				found.add(e);
+			// full match does not predict anything
+			size = Math.min(size, hole.length() - PrimitiveInteraction.LENGTH);
+
+			// size > 0 : there should be a matched part
+			if (size > 0) {
+				// if there is more than 1 matches, the less matches also
+				// predict, so let's iterate through sub-matches!
+
+				// i > 0 : full-matches not good, because with full-match
+				// program can not be predict anything (the not-match part is
+				// the prediction)
+				for (int i = size; i > 0; i -= PrimitiveInteraction.LENGTH) {
+					if (Utils.isFitted(key, hole, i)) {
+						Experiment e = new Experiment(experiments.get(hole));
+						e.setMatch(i / PrimitiveInteraction.LENGTH);
+						found.add(e);
+					}
+				}
+			}
+			else {
+				notMatched.add(experiments.get(hole));
 			}
 		}
 
+		System.out.println("NOTMATCHED:" + notMatched);
 		return found;
 	}
 
