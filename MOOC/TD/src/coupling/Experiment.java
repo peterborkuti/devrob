@@ -16,5 +16,10 @@ public class Experiment {
 	
 	public String getLabel(){
 		return this.label;
-	}	
+	}
+
+	@Override
+	public String toString() {
+		return label;
+	}
 }

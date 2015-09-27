@@ -35,4 +35,14 @@ public class Experiment040 extends Experiment {
 		return this.intendedInteraction;
 	}
 
+	@Override
+	public String toString() {
+		String s = super.toString();
+		String ss = (isAbstract) ? "A " : "C ";
+		if (isAbstract) {
+			ss += intendedInteraction.toString();
+		}
+		return ss + " " + s;
+	}
+
 }

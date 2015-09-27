@@ -37,10 +37,11 @@ public class Existence040 extends Existence031 {
 	public String step() {
 		
 		List<Anticipation> anticipations = anticipate();
+		System.out.println("Anticipations:" + anticipations);
 		Experiment040 experiment =  (Experiment040)selectExperiment(anticipations);
-
+		System.out.println("selectedExperiment:" + experiment);
 		Interaction040 intendedInteraction = experiment.getIntendedInteraction();
-
+		System.out.println("IntendedInteraction:" + intendedInteraction);
 		Interaction040 enactedInteraction = enact(intendedInteraction);
 		System.out.println("Enacted "+ enactedInteraction.toString());
 		

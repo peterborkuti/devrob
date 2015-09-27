@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -28,14 +29,14 @@ public class Experience {
 	 * It is for avoiding memory and/or performance issues
 	 */
 	public static final int MAX_EXPERIMENT_SIZE = 4;
-
+	public static final int MIN_EXPERIMENT_SIZE = 2;
 	/**
 	 * Memory of the robot about past experiments
 	 * The key of the map is the Experiment.key
 	 * @see Experiment.key
 	 */
 	private final Map<String, Experiment> experiments
-		= new HashMap<String, Experiment>();
+		= new TreeMap<String, Experiment>();
 
 	/**
 	 * Serial memory of the past experiments in order of time
@@ -96,7 +97,20 @@ public class Experience {
 	*/
 
 	private double getMax(Experiment e) {
-		return e.getProclivity();
+		String enactedKey = e.getUpToMatchedString();
+
+		// How many times was the matched part success in the past
+		//success == 0 will create 0 from negative valences
+		double success = 1;
+		if (experiments.containsKey(enactedKey)) {
+			Experiment enacted = experiments.get(enactedKey);
+			success = enacted.getSuccess();
+		};
+
+		e.setProclivity(success * e.getValence());
+
+		//past success multiply by the proposed actions valence
+		return success * e.getValence();
 	}
 
 	public Experiment getBestExperiment(PrimitiveInteractions pis) {
@@ -109,12 +123,13 @@ public class Experience {
 		List<Experiment> bestExperiences = new ArrayList<Experiment>();
 
 		for (Experiment e: found) {
-			if (getMax(e) > max) {
+			double eValue = getMax(e);
+			if (eValue > max) {
 				bestExperiences.clear();
-				max = getMax(e);
+				max = eValue;
 			}
 
-			if (Math.abs(max - getMax(e)) < 0.1) {
+			if (Math.abs(max - eValue) < 0.1) {
 				bestExperiences.add(new Experiment(e));
 			}
 		}
@@ -271,9 +286,9 @@ public class Experience {
 
 	private void insertOrUpdateExperiment(Experiment e, boolean success) {
 		if (e == null || e.isPrimitiveInteraction() ||
-			//!Experiment.isValuableExperiment(e) ||
-			e.experiment.size() > MAX_EXPERIMENT_SIZE ||
-			e.experiment.size() < MAX_EXPERIMENT_SIZE) {
+			e.experiment.size() < MIN_EXPERIMENT_SIZE ||
+			e.experiment.size() > MAX_EXPERIMENT_SIZE)
+			{
 
 			return;
 		}

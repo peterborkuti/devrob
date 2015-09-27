@@ -8,6 +8,7 @@ import hu.bp.common.FourStepWorld;
 import hu.bp.common.Mood;
 import hu.bp.common.SimpleWorld;
 import hu.bp.common.ThreeStepWorld;
+import hu.bp.common.ThreeStepWorld2;
 import hu.bp.common.TwoStepWorld;
 import hu.bp.common.World;
 import hu.bp.selfprogramming.modules.Experience;

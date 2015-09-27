@@ -172,6 +172,14 @@ public class Experiment {
 		return key.substring(match * PrimitiveInteraction.LENGTH);
 	}
 
+	public String getUpToMatchedString() {
+		if (match == 0) {
+			return "";
+		}
+
+		return key.substring(0, (match - 1) * PrimitiveInteraction.LENGTH);
+	}
+
 	public ImmutableList<PrimitiveInteraction> getAfterMatchedList() {
 		return experiment.subList(match, experiment.size());
 	}
@@ -264,6 +272,10 @@ public class Experiment {
 
 	private void countProclivity() {
 		this.proclivity = valence * match * success / tried;
+	}
+
+	public void setProclivity(double p) {
+		proclivity = p;
 	}
 
 }
